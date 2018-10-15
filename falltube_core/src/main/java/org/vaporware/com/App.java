@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import org.vaporware.com.domain.YoutubeDataDownloader;
 
 public class App {
 
@@ -51,10 +52,10 @@ public class App {
      */
     private static YouTube youtube;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Read the developer key from youtube.properties
         Properties properties = new Properties();
-        properties.put("youtube.apikey", "XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+        properties.put("youtube.apikey", "key");
 
         /*
        * The YouTube object is used to make all API requests. The last argument is required, but
@@ -67,15 +68,18 @@ public class App {
             }
         }).setApplicationName("youtube-cmdline-search-sample").build();
         
-        searchVideos(properties.getProperty("youtube.apikey"));
-        readComments("GMFewiplIbw", properties.getProperty("youtube.apikey"), 20l);
+      //  searchVideos(properties.getProperty("youtube.apikey"));
+      // readComments("GMFewiplIbw", properties.getProperty("youtube.apikey"), 20l);
+      YoutubeDataDownloader d=new YoutubeDataDownloader("key");
+      d.getVideoDataFromID("qj58nbn35bg");
     }
 
     public static void searchVideos(String apiKey) {
         try {
 
             // Get query term from user.
-            String queryTerm = getInputQuery();
+          //  String queryTerm = getInputQuery();
+            String queryTerm = "mayores";
 
             YouTube.Search.List search = youtube.search().list("id,snippet");
             /*
@@ -83,7 +87,8 @@ public class App {
        * non-authenticated requests (found under the API Access tab at this link:
        * code.google.com/apis/). This is good practice and increased your quota.
              */
-
+           
+        //print l.text
             search.setKey(apiKey);
             search.setQ(queryTerm);
             /*
@@ -95,8 +100,10 @@ public class App {
        * This method reduces the info returned to only the fields we need and makes calls more
        * efficient.
              */
-            search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
-            search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+           // search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url,snippet/description)");
+            //search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/channelTitle,likeCount)");
+            //search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+            search.setMaxResults(1l);
             SearchListResponse searchResponse = search.execute();
 
             List<SearchResult> searchResultList = searchResponse.getItems();
@@ -126,6 +133,7 @@ public class App {
                 CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
                 System.out.println("  - Author: " + snippet.getAuthorDisplayName());
                 System.out.println("  - Comment: " + snippet.getTextDisplay());
+                
                 System.out.println("\n-------------------------------------------------------------\n");
             }
 
@@ -160,7 +168,7 @@ public class App {
    *
    * @param query Search query (String)
      */
-    private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
+    private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) throws IOException {
 
         System.out.println("\n=============================================================");
         System.out.println(
@@ -175,14 +183,19 @@ public class App {
 
             SearchResult singleVideo = iteratorSearchResults.next();
             ResourceId rId = singleVideo.getId();
-
+            //search.setFields("items(id/videoId,snippet/title,snippet/description,snippet/channelTitle,snippet/tags,snippet/categoryId)");
             // Double checks the kind is video.
             if (rId.getKind().equals("youtube#video")) {
-                Thumbnail thumbnail = (Thumbnail) singleVideo.getSnippet().getThumbnails().get("default");
+               
 
                 System.out.println(" Video Id: " + rId.getVideoId());
                 System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
-                System.out.println(" Thumbnail: " + thumbnail.getUrl());
+                System.out.println(" Description: " + singleVideo.getSnippet().getDescription());
+                System.out.println(" Channel: " + singleVideo.getSnippet().getChannelTitle());
+                System.out.println(" etag: " + singleVideo.getEtag());
+                System.out.println(" Fecha: " + singleVideo.getSnippet().getPublishedAt());
+                System.out.println(" Channel id: " + singleVideo.getSnippet().getChannelId());
+                System.out.println("live content: " + singleVideo.getSnippet().getLiveBroadcastContent()); 
                 System.out.println("\n-------------------------------------------------------------\n");
             }
             
