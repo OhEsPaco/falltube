@@ -5,8 +5,8 @@
  */
 package org.vaporware.com.domain.video;
 
-public class YoutubeVideoData
-{
+public class YoutubeVideoData {
+
     private String etag;
 
     private Items[] items;
@@ -15,49 +15,40 @@ public class YoutubeVideoData
 
     private String kind;
 
-    public String getEtag ()
-    {
+    public String getEtag() {
         return etag;
     }
 
-    public void setEtag (String etag)
-    {
+    public void setEtag(String etag) {
         this.etag = etag;
     }
 
-    public Items[] getItems ()
-    {
+    public Items[] getItems() {
         return items;
     }
 
-    public void setItems (Items[] items)
-    {
+    public void setItems(Items[] items) {
         this.items = items;
     }
 
-    public PageInfo getPageInfo ()
-    {
+    public PageInfo getPageInfo() {
         return pageInfo;
     }
 
-    public void setPageInfo (PageInfo pageInfo)
-    {
+    public void setPageInfo(PageInfo pageInfo) {
         this.pageInfo = pageInfo;
     }
 
-    public String getKind ()
-    {
+    public String getKind() {
         return kind;
     }
 
-    public void setKind (String kind)
-    {
+    public void setKind(String kind) {
         this.kind = kind;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [etag = "+etag+", items = "+items+", pageInfo = "+pageInfo+", kind = "+kind+"]";
+    public String toString() {
+        return "ClassPojo [etag = " + etag + ", items = " + items + ", pageInfo = " + pageInfo + ", kind = " + kind + "]";
     }
 }

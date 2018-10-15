@@ -5,8 +5,8 @@
  */
 package org.vaporware.com.domain.video;
 
-public class Statistics
-{
+public class Statistics {
+
     private String favoriteCount;
 
     private String dislikeCount;
@@ -17,61 +17,48 @@ public class Statistics
 
     private String viewCount;
 
-    public String getFavoriteCount ()
-    {
+    public String getFavoriteCount() {
         return favoriteCount;
     }
 
-    public void setFavoriteCount (String favoriteCount)
-    {
+    public void setFavoriteCount(String favoriteCount) {
         this.favoriteCount = favoriteCount;
     }
 
-    public String getDislikeCount ()
-    {
+    public String getDislikeCount() {
         return dislikeCount;
     }
 
-    public void setDislikeCount (String dislikeCount)
-    {
+    public void setDislikeCount(String dislikeCount) {
         this.dislikeCount = dislikeCount;
     }
 
-    public String getLikeCount ()
-    {
+    public String getLikeCount() {
         return likeCount;
     }
 
-    public void setLikeCount (String likeCount)
-    {
+    public void setLikeCount(String likeCount) {
         this.likeCount = likeCount;
     }
 
-    public String getCommentCount ()
-    {
+    public String getCommentCount() {
         return commentCount;
     }
 
-    public void setCommentCount (String commentCount)
-    {
+    public void setCommentCount(String commentCount) {
         this.commentCount = commentCount;
     }
 
-    public String getViewCount ()
-    {
+    public String getViewCount() {
         return viewCount;
     }
 
-    public void setViewCount (String viewCount)
-    {
+    public void setViewCount(String viewCount) {
         this.viewCount = viewCount;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [favoriteCount = "+favoriteCount+", dislikeCount = "+dislikeCount+", likeCount = "+likeCount+", commentCount = "+commentCount+", viewCount = "+viewCount+"]";
+    public String toString() {
+        return "ClassPojo [favoriteCount = " + favoriteCount + ", dislikeCount = " + dislikeCount + ", likeCount = " + likeCount + ", commentCount = " + commentCount + ", viewCount = " + viewCount + "]";
     }
 }
-			
-			

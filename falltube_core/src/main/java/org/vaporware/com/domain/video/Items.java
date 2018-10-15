@@ -5,8 +5,8 @@
  */
 package org.vaporware.com.domain.video;
 
-public class Items
-{
+public class Items {
+
     private String id;
 
     private String etag;
@@ -19,71 +19,56 @@ public class Items
 
     private Statistics statistics;
 
-    public String getId ()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId (String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getEtag ()
-    {
+    public String getEtag() {
         return etag;
     }
 
-    public void setEtag (String etag)
-    {
+    public void setEtag(String etag) {
         this.etag = etag;
     }
 
-    public Snippet getSnippet ()
-    {
+    public Snippet getSnippet() {
         return snippet;
     }
 
-    public void setSnippet (Snippet snippet)
-    {
+    public void setSnippet(Snippet snippet) {
         this.snippet = snippet;
     }
 
-    public ContentDetails getContentDetails ()
-    {
+    public ContentDetails getContentDetails() {
         return contentDetails;
     }
 
-    public void setContentDetails (ContentDetails contentDetails)
-    {
+    public void setContentDetails(ContentDetails contentDetails) {
         this.contentDetails = contentDetails;
     }
 
-    public String getKind ()
-    {
+    public String getKind() {
         return kind;
     }
 
-    public void setKind (String kind)
-    {
+    public void setKind(String kind) {
         this.kind = kind;
     }
 
-    public Statistics getStatistics ()
-    {
+    public Statistics getStatistics() {
         return statistics;
     }
 
-    public void setStatistics (Statistics statistics)
-    {
+    public void setStatistics(Statistics statistics) {
         this.statistics = statistics;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [id = "+id+", etag = "+etag+", snippet = "+snippet+", contentDetails = "+contentDetails+", kind = "+kind+", statistics = "+statistics+"]";
+    public String toString() {
+        return "ClassPojo [id = " + id + ", etag = " + etag + ", snippet = " + snippet + ", contentDetails = " + contentDetails + ", kind = " + kind + ", statistics = " + statistics + "]";
     }
 }
-			
-			

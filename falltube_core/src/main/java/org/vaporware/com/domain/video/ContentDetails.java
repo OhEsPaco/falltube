@@ -5,8 +5,8 @@
  */
 package org.vaporware.com.domain.video;
 
-public class ContentDetails
-{
+public class ContentDetails {
+
     private String dimension;
 
     private String duration;
@@ -21,81 +21,64 @@ public class ContentDetails
 
     private RegionRestriction regionRestriction;
 
-    public String getDimension ()
-    {
+    public String getDimension() {
         return dimension;
     }
 
-    public void setDimension (String dimension)
-    {
+    public void setDimension(String dimension) {
         this.dimension = dimension;
     }
 
-    public String getDuration ()
-    {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration (String duration)
-    {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 
-    public String getLicensedContent ()
-    {
+    public String getLicensedContent() {
         return licensedContent;
     }
 
-    public void setLicensedContent (String licensedContent)
-    {
+    public void setLicensedContent(String licensedContent) {
         this.licensedContent = licensedContent;
     }
 
-    public String getDefinition ()
-    {
+    public String getDefinition() {
         return definition;
     }
 
-    public void setDefinition (String definition)
-    {
+    public void setDefinition(String definition) {
         this.definition = definition;
     }
 
-    public String getProjection ()
-    {
+    public String getProjection() {
         return projection;
     }
 
-    public void setProjection (String projection)
-    {
+    public void setProjection(String projection) {
         this.projection = projection;
     }
 
-    public String getCaption ()
-    {
+    public String getCaption() {
         return caption;
     }
 
-    public void setCaption (String caption)
-    {
+    public void setCaption(String caption) {
         this.caption = caption;
     }
 
-    public RegionRestriction getRegionRestriction ()
-    {
+    public RegionRestriction getRegionRestriction() {
         return regionRestriction;
     }
 
-    public void setRegionRestriction (RegionRestriction regionRestriction)
-    {
+    public void setRegionRestriction(RegionRestriction regionRestriction) {
         this.regionRestriction = regionRestriction;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [dimension = "+dimension+", duration = "+duration+", licensedContent = "+licensedContent+", definition = "+definition+", projection = "+projection+", caption = "+caption+", regionRestriction = "+regionRestriction+"]";
+    public String toString() {
+        return "ClassPojo [dimension = " + dimension + ", duration = " + duration + ", licensedContent = " + licensedContent + ", definition = " + definition + ", projection = " + projection + ", caption = " + caption + ", regionRestriction = " + regionRestriction + "]";
     }
 }
-			
-			

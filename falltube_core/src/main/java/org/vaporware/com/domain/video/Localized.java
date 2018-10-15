@@ -5,37 +5,30 @@
  */
 package org.vaporware.com.domain.video;
 
-public class Localized
-{
+public class Localized {
+
     private String title;
 
     private String description;
 
-    public String getTitle ()
-    {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle (String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getDescription ()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription (String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [title = "+title+", description = "+description+"]";
+    public String toString() {
+        return "ClassPojo [title = " + title + ", description = " + description + "]";
     }
 }
-			
-			

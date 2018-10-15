@@ -13,14 +13,15 @@ import java.util.Date;
  * @author pacog
  */
 public class YvdSimplified {
+
     private String id;
     private String etag;
-    private Date  publishedAt;
+    private String publishedAt;
     private String channelId;
     private String title;
     private String description;
     private String channelTitle;
-    private ArrayList<String>tags=new ArrayList<String>();
+    private ArrayList<String> tags = new ArrayList<String>();
     private String categoryId;
     private String defaultAudioLanguage;
     private String duration;
@@ -33,11 +34,12 @@ public class YvdSimplified {
     private long likeCount;
     private long dislikeCount;
     private long commentCount;
-    
-    public YvdSimplified(){
-        
+
+    public YvdSimplified() {
+
     }
-    public YvdSimplified(String id, String etag, Date publishedAt, String channelId, String title, String description, String channelTitle, String categoryId, String defaultAudioLanguage, String duration, String dimension, String definition, boolean caption, boolean licensedContent, String projection, long viewCount, long likeCount, long dislikeCount, long commentCount) {
+
+    public YvdSimplified(String id, String etag, String publishedAt, String channelId, String title, String description, String channelTitle, String categoryId, String defaultAudioLanguage, String duration, String dimension, String definition, Boolean caption, boolean licensedContent, String projection, long viewCount, long likeCount, long dislikeCount, long commentCount) {
         this.id = id;
         this.etag = etag;
         this.publishedAt = publishedAt;
@@ -75,11 +77,11 @@ public class YvdSimplified {
         this.etag = etag;
     }
 
-    public Date getPublishedAt() {
+    public String getPublishedAt() {
         return publishedAt;
     }
 
-    public void setPublishedAt(Date publishedAt) {
+    public void setPublishedAt(String publishedAt) {
         this.publishedAt = publishedAt;
     }
 
@@ -163,11 +165,11 @@ public class YvdSimplified {
         this.definition = definition;
     }
 
-    public boolean isCaption() {
+    public Boolean isCaption() {
         return caption;
     }
 
-    public void setCaption(boolean caption) {
+    public void setCaption(Boolean caption) {
         this.caption = caption;
     }
 
@@ -218,6 +220,11 @@ public class YvdSimplified {
     public void setCommentCount(long commentCount) {
         this.commentCount = commentCount;
     }
-    
-    
+
+    @Override
+    public String toString() {
+
+        return "YvdSimplified{" + "id=" + id + ", etag=" + etag + ", publishedAt=" + publishedAt + ", channelId=" + channelId + ", title=" + title + ", channelTitle=" + channelTitle + ", categoryId=" + categoryId + ", defaultAudioLanguage=" + defaultAudioLanguage + ", duration=" + duration + ", dimension=" + dimension + ", definition=" + definition + ", caption=" + caption + ", licensedContent=" + licensedContent + ", projection=" + projection + ", viewCount=" + viewCount + ", likeCount=" + likeCount + ", dislikeCount=" + dislikeCount + ", commentCount=" + commentCount + '}';
+    }
+
 }

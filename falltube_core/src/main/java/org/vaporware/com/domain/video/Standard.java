@@ -4,48 +4,41 @@
  * and open the template in the editor.
  */
 package org.vaporware.com.domain.video;
-public class Standard
-{
+
+public class Standard {
+
     private String height;
 
     private String width;
 
     private String url;
 
-    public String getHeight ()
-    {
+    public String getHeight() {
         return height;
     }
 
-    public void setHeight (String height)
-    {
+    public void setHeight(String height) {
         this.height = height;
     }
 
-    public String getWidth ()
-    {
+    public String getWidth() {
         return width;
     }
 
-    public void setWidth (String width)
-    {
+    public void setWidth(String width) {
         this.width = width;
     }
 
-    public String getUrl ()
-    {
+    public String getUrl() {
         return url;
     }
 
-    public void setUrl (String url)
-    {
+    public void setUrl(String url) {
         this.url = url;
     }
 
     @Override
-    public String toString()
-    {
-        return "ClassPojo [height = "+height+", width = "+width+", url = "+url+"]";
+    public String toString() {
+        return "ClassPojo [height = " + height + ", width = " + width + ", url = " + url + "]";
     }
 }
-			
