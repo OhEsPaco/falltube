@@ -14,6 +14,8 @@ public class YoutubeVideoData {
     private PageInfo pageInfo;
 
     private String kind;
+    
+    private String nextPageToken;
 
     public String getEtag() {
         return etag;

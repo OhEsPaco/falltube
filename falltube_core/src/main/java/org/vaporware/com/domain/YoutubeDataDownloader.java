@@ -5,6 +5,7 @@
  */
 package org.vaporware.com.domain;
 
+import org.vaporware.com.domain.search.SearchObject;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
@@ -15,19 +16,18 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThread;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
-import com.google.api.services.youtube.model.ResourceId;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import org.vaporware.com.domain.exceptions.NoMorePagesException;
+import org.vaporware.com.domain.exceptions.NoResultsException;
 import org.vaporware.com.domain.video.YoutubeVideoData;
+import org.vaporware.com.persistence.SQLManager;
 
 /**
  *
@@ -72,6 +72,48 @@ public class YoutubeDataDownloader {
         return video;
     }
 
+    public SearchObject search(String query, long resultsPerSearch) throws MalformedURLException, IOException, NoResultsException {
+        String requestURL = "https://www.googleapis.com/youtube/v3/search?key=" + APIKEY + "&part=snippet&maxResults=" + resultsPerSearch + "&order=viewCount&q=" + query + "&type=video";
+        URL request = new URL(requestURL);
+        URLConnection connection = request.openConnection();
+        connection.setDoOutput(true);
+
+        Scanner scanner = new Scanner(request.openStream());
+        String response = scanner.useDelimiter("\\Z").next();
+        SearchObject sea = g.fromJson(response, SearchObject.class);
+        if (sea.getItems().size() == 0) {
+            throw new NoResultsException();
+        }
+        return sea;
+
+    }
+
+    public SearchObject search(String query, long resultsPerSearch, SearchObject searchLast) throws MalformedURLException, IOException, NoMorePagesException, NoResultsException {
+        if (searchLast.getNextPageToken() == null) {
+            throw new NoMorePagesException();
+        }
+        String requestURL = "https://www.googleapis.com/youtube/v3/search?key=" + APIKEY + "&part=snippet&maxResults=" + resultsPerSearch + "&order=viewCount&pageToken=" + searchLast.getNextPageToken() + "&q=" + query + "&type=video";
+        URL request = new URL(requestURL);
+        URLConnection connection = request.openConnection();
+        connection.setDoOutput(true);
+
+        Scanner scanner = new Scanner(request.openStream());
+        String response = scanner.useDelimiter("\\Z").next();
+        SearchObject sea = g.fromJson(response, SearchObject.class);
+        if (sea.getItems().size() == 0) {
+            throw new NoResultsException();
+        }
+        return sea;
+    }
+
+    public String[] searchObjectToIDs(SearchObject sea) {
+        String[] ids = new String[sea.getItems().size()];
+        for (int i = 0; i < sea.getItems().size(); i++) {
+            ids[i] = sea.getItems().get(i).getId().getVideoId();
+        }
+        return ids;
+    }
+
     public YvdSimplified getVideoDataFromIDSimplified(String videoId) throws IOException {
         return YvdSimplifier.simplify(getVideoDataFromID(videoId));
     }
@@ -96,36 +138,13 @@ public class YoutubeDataDownloader {
         return comments;
     }
 
-    public void queryToSql(String queryTerm, long maxNumberOfVideos, long maxNumberOfComments) throws IOException {
-        YouTube.Search.List search = youtube.search().list("id,snippet");
-
-        search.setKey(APIKEY);
-        search.setQ(queryTerm);
-        search.setType("video");
-
-        search.setFields("items(id/kind,id/videoId)");
-        search.setMaxResults(maxNumberOfVideos);
-        SearchListResponse searchResponse = search.execute();
-
-        List<SearchResult> searchResultList = searchResponse.getItems();
-
-        if (searchResultList != null) {
-            Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
-            while (iteratorSearchResults.hasNext()) {
-
-                SearchResult singleVideo = iteratorSearchResults.next();
-                ResourceId rId = singleVideo.getId();
-                
-                if (rId.getKind().equals("youtube#video")) {
-                   
-                    //COMPROBAR PRIMERO QUE EL VIDEO NO ESTE EN LA BASE DE DATOS
-                    YvdSimplified video=getVideoDataFromIDSimplified(rId.getVideoId());
-                    ArrayList<Comment> comments=readComments(rId.getVideoId(),maxNumberOfComments);
-                    //Guardar el video en una tabla y los comentarios en otra
-
-                   
-                }
-            }
+    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException {
+        if (SQLManager.getInstance().isVideoOnDatabase(videoId) == false) {
+            YvdSimplified video = getVideoDataFromIDSimplified(videoId);
+            ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
+            SQLManager.getInstance().videoToDatabase(video);
+            SQLManager.getInstance().commentsToDatabase(comments);
         }
     }
+
 }
