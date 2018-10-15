@@ -11,7 +11,7 @@ import org.vaporware.com.domain.search.SearchObject;
 
 public class App {
 
-    private static final String APIKEY = "xxxxxxxxxxxxxxx";
+    private static final String APIKEY = "xxxxxxxxxxxxxxxxxx";
 
     public static void main(String[] args) throws IOException {
 

@@ -128,6 +128,7 @@ public class YoutubeDataDownloader {
         for (CommentThread videoComment : videoComments) {
             CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
             Comment comment = new Comment();
+            comment.setCommentId(videoComment.getId());
             comment.setVideoId(videoId);
             comment.setAuthorName(snippet.getAuthorDisplayName());
             comment.setAuthorUrl(snippet.getAuthorChannelUrl());

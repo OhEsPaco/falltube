@@ -12,9 +12,18 @@ package org.vaporware.com.domain;
 public class Comment {
 
     private String videoId;
+    private String commentId;
     private String authorName;
     private String authorUrl;
     private String comment;
+
+    public String getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
 
     public String getVideoId() {
         return videoId;
@@ -49,6 +58,6 @@ public class Comment {
     }
 
     public String toString() {
-        return ("Video ID: " + videoId + "\nAutor name: " + authorName + "\nAuthor url: " + authorUrl + "\n" + comment + "\n#####################################\n");
+        return ("CommentId: "+commentId+"\nVideo ID: " + videoId + "\nAutor name: " + authorName + "\nAuthor url: " + authorUrl + "\n" + comment + "\n#####################################\n");
     }
 }
