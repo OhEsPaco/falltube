@@ -81,7 +81,7 @@ public class YoutubeDataDownloader {
         Scanner scanner = new Scanner(request.openStream());
         String response = scanner.useDelimiter("\\Z").next();
         SearchObject sea = g.fromJson(response, SearchObject.class);
-        if (sea.getItems().size() == 0) {
+        if (sea.getItems().isEmpty()) {
             throw new NoResultsException();
         }
         return sea;
@@ -100,7 +100,7 @@ public class YoutubeDataDownloader {
         Scanner scanner = new Scanner(request.openStream());
         String response = scanner.useDelimiter("\\Z").next();
         SearchObject sea = g.fromJson(response, SearchObject.class);
-        if (sea.getItems().size() == 0) {
+        if (sea.getItems().isEmpty()) {
             throw new NoResultsException();
         }
         return sea;
