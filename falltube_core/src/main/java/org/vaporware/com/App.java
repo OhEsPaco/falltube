@@ -11,7 +11,7 @@ import org.vaporware.com.domain.search.SearchObject;
 
 public class App {
 
-    private static final String APIKEY = "AIzaSyDJGSqdVyg6YprVIoyg15wDxwTCLuw6nQ8";
+    private static final String APIKEY = "xxxxxxxxxxxxxxxxxx";
 
     public static void main(String[] args) throws IOException {
 
@@ -41,8 +41,8 @@ public class App {
     }
 
     public static void print(String[] array) {
-        for (String array1 : array) {
-            System.out.println("Video id: " + array1);
+        for (int i = 0; i < array.length; i++) {
+            System.out.println("Video id: " + array[i]);
         }
     }
 
