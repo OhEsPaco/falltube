@@ -9,7 +9,7 @@
 
     <groupId>org.vaporware.com</groupId>
     <artifactId>falltube_core</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3</version>
     <packaging>jar</packaging>
     <name>falltube_core</name>
     <!-- FIXME change it to the project's website -->

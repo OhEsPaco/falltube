@@ -27,6 +27,7 @@ import java.util.Scanner;
 import org.vaporware.com.domain.exceptions.NoMorePagesException;
 import org.vaporware.com.domain.exceptions.NoResultsException;
 import org.vaporware.com.domain.video.YoutubeVideoData;
+import org.vaporware.com.persistence.DAOManager;
 import org.vaporware.com.persistence.SQLManager;
 
 /**
@@ -140,11 +141,11 @@ public class YoutubeDataDownloader {
     }
 
     public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException {
-        if (SQLManager.getInstance().isVideoOnDatabase(videoId) == false) {
+        if (DAOManager.isVideoOnDatabase(videoId) == false) {
             YvdSimplified video = getVideoDataFromIDSimplified(videoId);
             ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
-            SQLManager.getInstance().videoToDatabase(video);
-            SQLManager.getInstance().commentsToDatabase(comments);
+            DAOManager.videoToDatabase(video);
+            DAOManager.commentsToDatabase(comments);
         }
     }
 
