@@ -28,7 +28,6 @@ import org.vaporware.com.domain.exceptions.NoMorePagesException;
 import org.vaporware.com.domain.exceptions.NoResultsException;
 import org.vaporware.com.domain.video.YoutubeVideoData;
 import org.vaporware.com.persistence.DAOManager;
-import org.vaporware.com.persistence.SQLManager;
 
 /**
  *

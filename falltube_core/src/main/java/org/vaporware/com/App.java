@@ -11,7 +11,7 @@ import org.vaporware.com.domain.search.SearchObject;
 
 public class App {
 
-    private static final String APIKEY = "XXXXXXXXXXXXXXXXXXXXXXX";
+    private static final String APIKEY = "XXXXXXXX";
 
     public static void main(String[] args) throws IOException {
 
@@ -38,6 +38,7 @@ public class App {
         } catch (NoResultsException ex2) {
             System.out.println("No hay resultados de busqueda");
         }
+        System.out.println(downloader.getVideoDataFromIDSimplified("bPa43oi7QWE"));
     }
 
     public static void print(String[] array) {
