@@ -32,9 +32,12 @@ public class YvdSimplifier {
             simplificado.setChannelTitle(snp.getChannelTitle());
 
             ArrayList<String> tags = new ArrayList<String>();
-            for (String tag : snp.getTags()) {
+            if(snp.getTags()!=null){
+                for (String tag : snp.getTags()) {
                 tags.add(tag);
             }
+            }
+            
             simplificado.setTags(tags);
 
             simplificado.setCategoryId(snp.getCategoryId());
@@ -47,10 +50,36 @@ public class YvdSimplifier {
             simplificado.setLicensedContent(Boolean.parseBoolean(item.getContentDetails().getLicensedContent()));
             simplificado.setProjection(item.getContentDetails().getProjection());
 
-            simplificado.setViewCount(Long.parseLong(item.getStatistics().getViewCount()));
-            simplificado.setLikeCount(Long.parseLong(item.getStatistics().getLikeCount()));
-            simplificado.setDislikeCount(Long.parseLong(item.getStatistics().getDislikeCount()));
-            simplificado.setCommentCount(Long.parseLong(item.getStatistics().getCommentCount()));
+            
+             if(item.getStatistics().getViewCount()==null){
+                simplificado.setViewCount(0);
+            }  else{
+               simplificado.setViewCount(Long.parseLong(item.getStatistics().getViewCount()));
+            }  
+             
+             
+             
+            
+             if(item.getStatistics().getLikeCount()==null){
+                simplificado.setLikeCount(0);
+            }  else{
+               simplificado.setLikeCount(Long.parseLong(item.getStatistics().getLikeCount()));
+            }  
+             
+            
+             if(item.getStatistics().getDislikeCount()==null){
+                simplificado.setDislikeCount(0);
+            }  else{
+               simplificado.setDislikeCount(Long.parseLong(item.getStatistics().getDislikeCount()));
+            }  
+           
+            
+            if(item.getStatistics().getCommentCount()==null){
+                simplificado.setCommentCount(0);
+            }  else{
+                simplificado.setCommentCount(Long.parseLong(item.getStatistics().getCommentCount()));
+            }  
+            
 
         }
 

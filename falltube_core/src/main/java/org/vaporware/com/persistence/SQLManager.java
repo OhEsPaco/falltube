@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.vaporware.com.domain.Comment;
 import org.vaporware.com.domain.YvdSimplified;
 
@@ -23,14 +25,18 @@ import org.vaporware.com.domain.YvdSimplified;
 public class SQLManager {
 
     private static SQLManager INSTANCE;
-    
-    protected static SQLManager mInstancia = null;	   
-    protected static Connection mBD;    
-    private static String url = "jdbc:mysql://localhost:3307/practicabd?user=alumno&password=alumno";    
+
+    protected static SQLManager mInstancia = null;
+    protected static Connection mBD;
+    private static String url = "jdbc:mysql://localhost:3306/falltube?user=falltube&password=12345&serverTimezone=UTC";
     private static String driver = "com.mysql.jdbc.Driver";
-    
+
     private SQLManager() {
         conectar();
+    }
+
+    public Connection getConnection() {
+        return mBD;
     }
 
     public static SQLManager getInstance() {
@@ -39,34 +45,121 @@ public class SQLManager {
         }
         return INSTANCE;
     }
-    
+
     //Metodo para conectar de la base de datos
     private void conectar() {
-        try{
+
+        try {
             Class.forName(driver);
             mBD = DriverManager.getConnection(url);
-        }catch(Exception e){
-            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     // Metodo para desconectar de la base de datos
     public void desconectar() {
-        try{
+        try {
             mBD.close();
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+
         }
     }
 
-    // Metodo para realizar una insercion en la base de datos
-    public int insert(String SQL) throws SQLException, Exception {
+    public boolean isVideo(String id) throws SQLException {
+        String sql = "Select 1 from video where videoId = ?";
         conectar();
-        PreparedStatement stmt = mBD.prepareStatement(SQL);
+        PreparedStatement ps = mBD.prepareStatement(sql);
+        ps.setString(1, id);
+        ResultSet rs = ps.executeQuery();
+        boolean r= rs.next();
+        desconectar();
+        return r;
+    }
+
+    // Metodo para realizar una insercion en la base de datos
+    public int insert(PreparedStatement stmt) throws SQLException, Exception {
+        conectar();
         int res = stmt.executeUpdate();
         stmt.close();
         desconectar();
         return res;
+    }
+
+    public int insertVideo(YvdSimplified video) throws SQLException, Exception {
+
+        conectar();
+        String sql = "insert into video values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        PreparedStatement ps = mBD.prepareStatement(sql);
+        ps.setString(1, video.getId());
+        ps.setString(2, video.getEtag());
+        ps.setString(3, video.getPublishedAt());
+        ps.setString(4, video.getChannelId());
+        
+        ps.setString(5, video.getTitle().substring(0, (video.getTitle().length() < 200)?video.getTitle().length():200));//200
+        ps.setString(6, video.getDescription().substring(0, (video.getDescription().length() < 2000)?video.getDescription().length():2000));//2000
+        ps.setString(7, video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200)?video.getChannelTitle().length():200));//200
+        
+        ps.setString(8, video.getCategoryId());
+        ps.setString(9, video.getDefaultAudioLanguage());
+        ps.setString(10, video.getDuration());
+        ps.setString(11, video.getDimension());
+        ps.setString(12, video.getDefinition());
+        ps.setBoolean(13, video.isCaption());
+        ps.setBoolean(14, video.isLicensedContent());
+        ps.setString(15, video.getProjection());
+        ps.setLong(16, video.getViewCount());
+        ps.setLong(17, video.getLikeCount());
+        ps.setLong(18, video.getDislikeCount());
+        ps.setLong(19, video.getCommentCount());
+        
+        int lastTag = 20;
+        for (int i = 0; i < video.getTags().size() && i < 10; i++) {
+            ps.setString(lastTag, video.getTags().get(i).substring(0, (video.getTags().get(i).length() < 200)?video.getTags().get(i).length():200));//200
+            lastTag++;
+        }
+        
+        if (lastTag != 30) {
+            for (int i = lastTag; i < 30; i++) {
+                ps.setString(i, null);
+            }
+        }
+
+        int res = ps.executeUpdate();
+        desconectar();
+        return res;
+
+    }
+
+    public void insertComments(ArrayList<Comment> comments) throws SQLException, Exception {
+        for (Comment comment : comments) {
+            insertComment(comment);
+        }
+    }
+
+    public int insertComment(Comment comment) throws SQLException, Exception {
+
+        conectar();
+        String sql = "insert into comments values(?,?,?,?,?)";
+        PreparedStatement ps = mBD.prepareStatement(sql);
+        ps.setString(1, comment.getCommentId());
+        ps.setString(2, comment.getVideoId());
+        ps.setString(3, comment.getAuthorName().substring(0, (comment.getAuthorName().length() < 100)?comment.getAuthorName().length():100));//100
+        ps.setString(4, comment.getaAthorUrl().substring(0, (comment.getaAthorUrl().length() < 100)?comment.getaAthorUrl().length():100));//100
+        ps.setString(5, comment.getComment().substring(0, (comment.getComment().length() < 2000)?comment.getComment().length():2000));//2000
+        int res=0;
+        try{
+              res = ps.executeUpdate();
+        }catch(SQLException ex){
+            
+        }
+       
+        desconectar();
+        return res;
+
     }
 
     // Metodo para realizar una eliminacion en la base de datos
@@ -120,5 +213,5 @@ public class SQLManager {
         }
 
         return v;
-    }    
+    }
 }

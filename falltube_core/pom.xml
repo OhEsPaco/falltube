@@ -9,7 +9,7 @@
 
     <groupId>org.vaporware.com</groupId>
     <artifactId>falltube_core</artifactId>
-    <version>0.3.6</version>
+    <version>0.5.0</version>
     <packaging>jar</packaging>
     <name>falltube_core</name>
     <!-- FIXME change it to the project's website -->
@@ -29,16 +29,22 @@
             <url>http://google-api-client-libraries.appspot.com/mavenrepo</url>
         </repository>
         <repository>
-      <id>codehaus</id>
-      <url>http://repository.codehaus.org/org/codehaus</url>
-    </repository>
+            <id>codehaus</id>
+            <url>http://repository.codehaus.org/org/codehaus</url>
+        </repository>
     </repositories>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.4</version>
-    </dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.4</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

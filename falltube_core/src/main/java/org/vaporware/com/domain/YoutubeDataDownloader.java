@@ -119,32 +119,38 @@ public class YoutubeDataDownloader {
     }
 
     public ArrayList<Comment> readComments(String videoId, long maxNumberOfResults) throws IOException {
-
-        CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
-                .list("snippet").setKey(APIKEY).setVideoId(videoId).setMaxResults(maxNumberOfResults).setTextFormat("plainText").execute();
-
-        List<CommentThread> videoComments = videoCommentsListResponse.getItems();
         ArrayList<Comment> comments = new ArrayList<Comment>();
-        for (CommentThread videoComment : videoComments) {
-            CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
-            Comment comment = new Comment();
-            comment.setCommentId(videoComment.getId());
-            comment.setVideoId(videoId);
-            comment.setAuthorName(snippet.getAuthorDisplayName());
-            comment.setAuthorUrl(snippet.getAuthorChannelUrl());
-            comment.setComment(snippet.getTextDisplay());
-            comments.add(comment);
+        try {
+            CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
+                    .list("snippet").setKey(APIKEY).setVideoId(videoId).setMaxResults(maxNumberOfResults).setTextFormat("plainText").execute();
+
+            List<CommentThread> videoComments = videoCommentsListResponse.getItems();
+
+            for (CommentThread videoComment : videoComments) {
+                CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
+                Comment comment = new Comment();
+                comment.setCommentId(videoComment.getId());
+                comment.setVideoId(videoId);
+                comment.setAuthorName(snippet.getAuthorDisplayName());
+                comment.setAuthorUrl(snippet.getAuthorChannelUrl());
+                comment.setComment(snippet.getTextDisplay());
+                comments.add(comment);
+            }
+
+        } catch (Exception e) {
+
         }
 
         return comments;
     }
 
-    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException {
-        if (DAOManager.isVideoOnDatabase(videoId) == false) {
+    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, Exception {
+        DAOManager dao = new DAOManager();
+        if (dao.isVideoOnDatabase(videoId) == false) {
             YvdSimplified video = getVideoDataFromIDSimplified(videoId);
             ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
-            DAOManager.videoToDatabase(video);
-            DAOManager.commentsToDatabase(comments);
+            dao.videoToDatabase(video);
+            dao.commentsToDatabase(comments);
         }
     }
 
