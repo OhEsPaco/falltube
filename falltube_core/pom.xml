@@ -9,7 +9,7 @@
 
     <groupId>org.vaporware.com</groupId>
     <artifactId>falltube_core</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <packaging>jar</packaging>
     <name>falltube_core</name>
     <!-- FIXME change it to the project's website -->
@@ -28,12 +28,21 @@
             <id>google-api-services</id>
             <url>http://google-api-client-libraries.appspot.com/mavenrepo</url>
         </repository>
+        <repository> 
+            <id>tilab</id> 
+            <url>http://jade.tilab.com/maven/</url> 
+        </repository>
         <repository>
             <id>codehaus</id>
             <url>http://repository.codehaus.org/org/codehaus</url>
         </repository>
     </repositories>
     <dependencies>
+        <dependency>  
+            <groupId>com.tilab.jade</groupId> 
+            <artifactId>jade</artifactId> 
+            <version>4.5.0</version>  
+        </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>mysql</groupId>

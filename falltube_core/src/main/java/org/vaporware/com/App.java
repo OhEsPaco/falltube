@@ -13,7 +13,7 @@ public class App {
 
     private static final String APIKEY = "xxxxxx";
 
-    public static void main(String[] args) throws IOException, Exception {
+ /*   public static void main(String[] args) throws IOException, Exception {
 
         YoutubeDataDownloader downloader = new YoutubeDataDownloader(APIKEY);
         String query = "alexelcapo";
@@ -47,7 +47,7 @@ public class App {
        
         
        
-    }
+    }*/
 
     public static void print(String[] array) {
         for (String array1 : array) {
