@@ -23,7 +23,7 @@ import org.vaporware.com.domain.search.SearchObject;
 public class DownloaderAgent extends Agent {
 
     private int agentesParados = 0;
-    private Communicator com = new Communicator();
+   
 
     @Override
     protected void setup() {
@@ -48,7 +48,7 @@ public class DownloaderAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        // com.getArea().append("<Agente>Terminado\n");
+      
         System.out.println("<Agente>Terminado");
     }
 
@@ -60,14 +60,14 @@ public class DownloaderAgent extends Agent {
         public Ticker(Agent a, long time, DownloaderBehaviour[] comps) {
             super(a, time);
             this.comps = comps;
-            //    com.getArea().append("<Ticker>Blocking " + comps[behaviourToSleep].getName() + "\n");
+            
             System.out.println("<Ticker>Blocking " + comps[behaviourToSleep].getName());
             comps[behaviourToSleep].block();
         }
 
         @Override
         protected void onTick() {
-            //  com.getArea().append("<Ticker>Restarting " + comps[behaviourToSleep].getName() + "\n");
+            
             System.out.println("<Ticker>Restarting " + comps[behaviourToSleep].getName());
             comps[behaviourToSleep].restart();
             if (behaviourToSleep >= comps.length - 1) {
@@ -75,7 +75,7 @@ public class DownloaderAgent extends Agent {
             } else {
                 behaviourToSleep++;
             }
-            //  com.getArea().append("<Ticker>Blocking " + comps[behaviourToSleep].getName() + "\n");
+           
             System.out.println("<Ticker>Blocking " + comps[behaviourToSleep].getName());
             comps[behaviourToSleep].block();
             if (agentesParados >= comps.length) {
@@ -121,7 +121,7 @@ public class DownloaderAgent extends Agent {
         public void onStart() {
            
                 try {
-                    //  com.getArea().append("<" + name + ">Starting...\n");
+                    
                     System.out.println("<" + name + ">Starting...");
                     aux = downloader.search(query, maxResults);
                     ids = downloader.searchObjectToIDs(aux);
@@ -129,17 +129,17 @@ public class DownloaderAgent extends Agent {
                         downloader.videoIdToSql(ids[a], 50);
                     }
                 } catch (IOException ex) {
-                    // com.getArea().append("<" + name + ">IOException\n");
+                
                     System.out.println("<" + name + ">IOException");
                     continuar = false;
                     agentesParados++;
                 } catch (NoResultsException ex) {
-                    //  com.getArea().append("<" + name + ">No more results\n");
+                  
                     System.out.println("<" + name + ">No more results");
                     continuar = false;
                     agentesParados++;
                 } catch (Exception ex) {
-                    // com.getArea().append("<" + name + ">Exception\n");
+                   
                     System.out.println("<" + name + ">Exception");
                     continuar = false;
                     agentesParados++;
@@ -150,7 +150,7 @@ public class DownloaderAgent extends Agent {
 
         @Override
         public void action() {
-            // com.getArea().append("<" + name + ">Downloading...\n");
+          
             
             if (continuar) {
                 System.out.println("<" + name + ">Downloading...");
@@ -161,17 +161,17 @@ public class DownloaderAgent extends Agent {
                         downloader.videoIdToSql(ids[a], 50);
                     }
                 } catch (IOException ex) {
-                    //  com.getArea().append("<" + name + ">IOException\n");
+                   
                     System.out.println("<" + name + ">IOException");
                     continuar = false;
                     agentesParados++;
                 } catch (NoResultsException ex) {
-                    // com.getArea().append("<" + name + ">No more results\n");
+                    
                     System.out.println("<" + name + ">No more results");
                     continuar = false;
                     agentesParados++;
                 } catch (Exception ex) {
-                    //com.getArea().append("<" + name + ">Exception\n");
+                   
                     System.out.println("<" + name + ">Exception");
                     continuar = false;
                     agentesParados++;
