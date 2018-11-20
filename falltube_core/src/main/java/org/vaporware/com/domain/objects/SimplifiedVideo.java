@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.vaporware.com.domain;
+package org.vaporware.com.domain.objects;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +12,7 @@ import java.util.Date;
  *
  * @author pacog
  */
-public class YvdSimplified {
+public class SimplifiedVideo {
 
     private String id;
     private String etag;
@@ -35,11 +35,11 @@ public class YvdSimplified {
     private long dislikeCount;
     private long commentCount;
 
-    public YvdSimplified() {
+    public SimplifiedVideo() {
 
     }
 
-    public YvdSimplified(String id, String etag, String publishedAt, String channelId, String title, String description, String channelTitle, String categoryId, String defaultAudioLanguage, String duration, String dimension, String definition, Boolean caption, boolean licensedContent, String projection, long viewCount, long likeCount, long dislikeCount, long commentCount) {
+    public SimplifiedVideo(String id, String etag, String publishedAt, String channelId, String title, String description, String channelTitle, String categoryId, String defaultAudioLanguage, String duration, String dimension, String definition, Boolean caption, boolean licensedContent, String projection, long viewCount, long likeCount, long dislikeCount, long commentCount) {
         this.id = id;
         this.etag = etag;
         this.publishedAt = publishedAt;

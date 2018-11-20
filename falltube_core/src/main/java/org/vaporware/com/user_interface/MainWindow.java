@@ -51,7 +51,7 @@ public class MainWindow extends javax.swing.JFrame {
         System.out.println("<Lanzando el agente en el container principal>");
 
         AgentController rma = mainContainer.createNewAgent("Ag1",
-                "org.vaporware.com.domain.DownloaderAgent", new Object[0]);
+                "org.vaporware.com.domain.agents.SearchAgent", new Object[0]);
         rma.start();
         
     }

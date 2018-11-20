@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.vaporware.com.domain;
+package org.vaporware.com.domain.utilities;
 
+import org.vaporware.com.domain.objects.SimplifiedVideo;
 import java.util.ArrayList;
 import org.vaporware.com.domain.video.Items;
 import org.vaporware.com.domain.video.Snippet;
@@ -14,10 +15,10 @@ import org.vaporware.com.domain.video.YoutubeVideoData;
  *
  * @author pacog
  */
-public class YvdSimplifier {
+public class VideoSimplifier {
 
-    public static YvdSimplified simplify(YoutubeVideoData yvd) {
-        YvdSimplified simplificado = new YvdSimplified();
+    public static SimplifiedVideo simplify(YoutubeVideoData yvd) {
+        SimplifiedVideo simplificado = new SimplifiedVideo();
         Items[] items = yvd.getItems();
         for (Items item : items) {
             simplificado.setId(item.getId());
