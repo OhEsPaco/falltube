@@ -7,12 +7,14 @@ package org.vaporware.com.domain;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.TickerBehaviour;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.vaporware.com.domain.exceptions.NoMorePagesException;
 import org.vaporware.com.domain.exceptions.NoResultsException;
 import org.vaporware.com.domain.search.SearchObject;
 
@@ -22,166 +24,138 @@ import org.vaporware.com.domain.search.SearchObject;
  */
 public class DownloaderAgent extends Agent {
 
-    private int agentesParados = 0;
-   
+    private DownloaderBehaviour[] comps = new DownloaderBehaviour[5];
+    private ThreadedBehaviourFactory tbf;
+    private static final long MAX_PER_CYCLE = 10;
 
     @Override
     protected void setup() {
-        DownloaderBehaviour[] comps = new DownloaderBehaviour[5];
+        //String[] query = {"OT+2018", "fortnite", "wismichu", "frank+cuesta", "lifehacks"};
+        String[] query = {"OT+2018", "fortnite"};
         //String name, String apikey, String query, long maxResults
-        comps[0] = new DownloaderBehaviour("D0", "AIzaSyB-qDUXf_uuFatsVZxvcR6dTJZIfigg7_8", "OT+2018", 50l);
-        comps[1] = new DownloaderBehaviour("D1", "AIzaSyDkfZmnEr57TZODbzVheGc2V0YdVLejt_w", "fortnite", 50l);
-        comps[2] = new DownloaderBehaviour("D2", "AIzaSyApQPReZsm3AuAmr3GF-XT1Fyjxr_goQiQ", "wismichu", 50l);
-        comps[3] = new DownloaderBehaviour("D3", "AIzaSyC58IFEuX6tvUtaYcM1NBZACMx1kS3H0uI", "frank+cuesta", 50l);
-        comps[4] = new DownloaderBehaviour("D4", "AIzaSyAzybpaX__BhzsZrEi-dJFZvsJxjNyvg3Q", "lifehacks", 50l);
+        comps[0] = new DownloaderBehaviour("D0", "AIzaSyB-qDUXf_uuFatsVZxvcR6dTJZIfigg7_8", query, MAX_PER_CYCLE);
+        comps[1] = new DownloaderBehaviour("D1", "AIzaSyDkfZmnEr57TZODbzVheGc2V0YdVLejt_w", query, MAX_PER_CYCLE);
+        comps[2] = new DownloaderBehaviour("D2", "AIzaSyApQPReZsm3AuAmr3GF-XT1Fyjxr_goQiQ", query, MAX_PER_CYCLE);
+        comps[3] = new DownloaderBehaviour("D3", "AIzaSyC58IFEuX6tvUtaYcM1NBZACMx1kS3H0uI", query, MAX_PER_CYCLE);
+        comps[4] = new DownloaderBehaviour("D4", "AIzaSyAzybpaX__BhzsZrEi-dJFZvsJxjNyvg3Q", query, MAX_PER_CYCLE);
 
-        ParallelBehaviour par = new ParallelBehaviour();
-        Ticker tic = new Ticker(this, 60000, comps);
+        tbf = new ThreadedBehaviourFactory();
+        for (int i = 0; i < 1; i++) {
+            addBehaviour(tbf.wrap(comps[i]));
 
-        for (int i = 0; i < comps.length; i++) {
-            par.addSubBehaviour(comps[i]);
         }
-        ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
-        par.addSubBehaviour(tbf.wrap(tic));
-        addBehaviour(par);
+        addBehaviour(tbf.wrap(new Stopper()));
     }
 
     @Override
     protected void takeDown() {
-      
+        tbf.interrupt();
         System.out.println("<Agente>Terminado");
-    }
-
-    private class Ticker extends TickerBehaviour {
-
-        private DownloaderBehaviour[] comps;
-        private int behaviourToSleep = 0;
-
-        public Ticker(Agent a, long time, DownloaderBehaviour[] comps) {
-            super(a, time);
-            this.comps = comps;
-            
-            System.out.println("<Ticker>Blocking " + comps[behaviourToSleep].getName());
-            comps[behaviourToSleep].block();
-        }
-
-        @Override
-        protected void onTick() {
-            
-            System.out.println("<Ticker>Restarting " + comps[behaviourToSleep].getName());
-            comps[behaviourToSleep].restart();
-            if (behaviourToSleep >= comps.length - 1) {
-                behaviourToSleep = 0;
-            } else {
-                behaviourToSleep++;
-            }
-           
-            System.out.println("<Ticker>Blocking " + comps[behaviourToSleep].getName());
-            comps[behaviourToSleep].block();
-            if (agentesParados >= comps.length) {
-                //  com.getArea().append("<Ticker>Stopping...\n");
-                System.out.println("<Ticker>Stopping...");
-                this.stop();
-            }
-        }
-
-        @Override
-        public int onEnd() {
-            myAgent.doDelete();
-            return 0;
-        }
-
     }
 
     private class DownloaderBehaviour extends Behaviour {
 
         private String APIKEY;
         private String name;
-        private String query;
+        private String[] query;
+        private int queryIndex;
         private long maxResults;
         private YoutubeDataDownloader downloader;
-        private boolean continuar = true;
-        private SearchObject aux;
+        private boolean salir = false;
+        private SearchObject aux = null;
         private String[] ids;
         private boolean first = true;
 
-        public DownloaderBehaviour(String name, String apikey, String query, long maxResults) {
+        public DownloaderBehaviour(String name, String apikey, String query[], long maxResults) {
             this.name = name;
             this.APIKEY = apikey;
             this.query = query;
             this.maxResults = maxResults;
-            downloader = new YoutubeDataDownloader(APIKEY);
 
+        }
+
+        @Override
+        public void onStart() {
+            downloader = new YoutubeDataDownloader(APIKEY);
+            queryIndex = 0;
         }
 
         public String getName() {
             return name;
         }
 
-        public void onStart() {
-           
-                try {
-                    
-                    System.out.println("<" + name + ">Starting...");
-                    aux = downloader.search(query, maxResults);
-                    ids = downloader.searchObjectToIDs(aux);
-                    for (int a = 0; a < ids.length; a++) {
-                        downloader.videoIdToSql(ids[a], 50);
-                    }
-                } catch (IOException ex) {
-                
-                    System.out.println("<" + name + ">IOException");
-                    continuar = false;
-                    agentesParados++;
-                } catch (NoResultsException ex) {
-                  
-                    System.out.println("<" + name + ">No more results");
-                    continuar = false;
-                    agentesParados++;
-                } catch (Exception ex) {
-                   
-                    System.out.println("<" + name + ">Exception");
-                    continuar = false;
-                    agentesParados++;
-                }
-
-            
-        }
-
         @Override
         public void action() {
-          
-            
-            if (continuar) {
+
+            if (!salir) {
                 System.out.println("<" + name + ">Downloading...");
                 try {
-                    aux = downloader.search(query, maxResults, aux);
-                    ids = downloader.searchObjectToIDs(aux);
-                    for (int a = 0; a < ids.length; a++) {
-                        downloader.videoIdToSql(ids[a], 50);
+                    if (aux == null) {
+                        aux = downloader.search(query[queryIndex], maxResults);
+                    } else {
+                        aux = downloader.search(query[queryIndex], maxResults, aux);
                     }
-                } catch (IOException ex) {
-                   
-                    System.out.println("<" + name + ">IOException");
-                    continuar = false;
-                    agentesParados++;
-                } catch (NoResultsException ex) {
-                    
-                    System.out.println("<" + name + ">No more results");
-                    continuar = false;
-                    agentesParados++;
-                } catch (Exception ex) {
-                   
-                    System.out.println("<" + name + ">Exception");
-                    continuar = false;
-                    agentesParados++;
+
+                    ids = downloader.searchObjectToIDs(aux);
+                    for (String id : ids) {
+                        // downloader.videoIdToSql(ids[a], 50);
+                        System.out.println("<" + name + ">Downloading:" + id);
+                    }
+
+                } catch (NoResultsException | NoMorePagesException e) {
+
+                    if (queryIndex < ids.length-1) {
+                        queryIndex++;
+                        aux=null;
+                        System.out.println("<" + name + ">Cambiando query a:" + query[queryIndex]);
+                        block(2000);
+                    } else {
+                        System.out.println("<" + name + ">No hay mas resultados");
+                        salir = true;
+                    }
+
+                } catch (IOException z) {
+                    System.out.println("<" + name + ">Exception irrecuperable");
+                    salir = true;
                 }
             }
         }
 
         @Override
         public boolean done() {
-            return continuar;
+            return salir;
+        }
+
+    }
+
+    private class Stopper extends Behaviour {
+
+        private boolean salir;
+
+        @Override
+        public void action() {
+
+            salir = true;
+            for (DownloaderBehaviour comp : comps) {
+                if (comp.done() == false) {
+                    salir = false;
+                    break;
+                }
+            }
+
+        }
+
+        @Override
+        public boolean done() {
+
+            return salir;
+        }
+
+        @Override
+        public int onEnd() {
+            System.out.println("<Stopper>Todos los agentes parados");
+            myAgent.doDelete();
+            return 0;
         }
 
     }

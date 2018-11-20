@@ -28,7 +28,7 @@ public class SQLManager {
 
     protected static SQLManager mInstancia = null;
     protected static Connection mBD;
-    private static String url = "jdbc:mysql://localhost:3306/falltube?user=falltube&password=12345&serverTimezone=UTC&useSSL=false";
+    private static String url = "jdbc:mysql://localhost:3306/falltube?user=falltube&password=76/9+;bRAr&serverTimezone=UTC&useSSL=false";
     private static String driver = "com.mysql.cj.jdbc.Driver";
 
     private SQLManager() {
