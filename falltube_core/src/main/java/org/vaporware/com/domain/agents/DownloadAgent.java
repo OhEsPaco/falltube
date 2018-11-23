@@ -1,55 +1,37 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.vaporware.com.domain.agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.util.Logger;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
+import org.vaporware.com.domain.objects.PropertiesObjDownloader;
 import org.vaporware.com.domain.youtube.YoutubeDownloader;
 
-/**
- *
- * @author pacog
- */
 public class DownloadAgent extends Agent {
+
+    private PropertiesObjDownloader props;
+    private ThreadedBehaviourFactory tbf;
 
     @Override
     protected void setup() {
-        // Registration with the DF 
-        DFAgentDescription dfd = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType("DownloadAgent");
-        sd.setName(getName());
-        sd.setOwnership("Vaporware");
-        dfd.setName(getAID());
-        dfd.addServices(sd);
-        try {
-            DFService.register(this, dfd);
-            ThreadedBehaviourFactory tbf=new ThreadedBehaviourFactory();
-            DownloadBehaviour dBehaviour = new DownloadBehaviour(this);
-            addBehaviour(tbf.wrap(dBehaviour));
-        } catch (FIPAException e) {
-            doDelete();
-        }
+        System.out.println("<" + getName() + ">Setting up");
+        Object[] arguments = getArguments();
+        props = (PropertiesObjDownloader) arguments[0];
+        tbf = new ThreadedBehaviourFactory();
+        addBehaviour(new DownloadBehaviour(this));
+
+    }
+
+    protected void takeDown() {
+        System.out.println("<" + getName() + ">Taking down");
+        tbf.interrupt();
     }
 
     private class DownloadBehaviour extends CyclicBehaviour {
 
-        // YoutubeDownloader(String apiKey, String host, int port, String database, String user, String password)
         private YoutubeDownloader youtube;
-        private int numberOfComments;
+        private long numberOfComments;
 
         public DownloadBehaviour(Agent a) {
             super(a);
@@ -57,32 +39,35 @@ public class DownloadAgent extends Agent {
 
         @Override
         public void onStart() {
-            MessageTemplate performativa = MessageTemplate.MatchPerformative(Performatives.DATA_FOR_DOWNLOADER);
-            ACLMessage msg = myAgent.blockingReceive(performativa);
-            String[] s = msg.getContent().split("\\s+");
-            this.youtube = new YoutubeDownloader(s[5], s[0], Integer.parseInt(s[1]), s[2], s[3], s[4]);
-            this.numberOfComments = Integer.parseInt(s[6]);
+            this.youtube = new YoutubeDownloader(props.getApiKey(), props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword());
+            this.numberOfComments = props.getNumberOfComments();
         }
 
         @Override
         public void action() {
-            ACLMessage msg = myAgent.receive();
+            ACLMessage msg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(Performatives.ID_FOR_DOWNLOADER));
             if (msg != null) {
 
-                if (msg.getPerformative() == Performatives.ID_FOR_DOWNLOADER) {
-                    String content = msg.getContent();
-                    if (content != null) {
+                String content = msg.getContent();
+                if (content != null) {
+                    try {
+                        System.out.println("<" + myAgent.getName() + ">Saving video id:" + content);
+                        youtube.videoIdToSql(content, numberOfComments);
+                    } catch (Exception ex) {
+                       
+                        System.out.println("<" + myAgent.getName() + ">Error saving video id:" + content);
                         try {
+                            System.out.println("<" + myAgent.getName() + ">Saving video id:" + content + "[Retry]");
                             youtube.videoIdToSql(content, numberOfComments);
-                        } catch (Exception ex) {
-                            System.out.println("<" + getName() + ">Error saving video id:" + content);
+                        } catch (Exception ex1) {
+                            System.out.println("<" + myAgent.getName() + ">Error saving video id:" + content+"[Retry]");
                         }
-                    }
 
+                    }
+                    
+                   
                 }
-                block();
-            } else {
-                block();
+
             }
         }
 

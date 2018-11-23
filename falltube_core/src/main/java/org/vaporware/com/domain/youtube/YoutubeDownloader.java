@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.vaporware.com.domain.youtube;
 
 import org.vaporware.com.domain.utilities.VideoSimplifier;
@@ -23,6 +18,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -76,7 +72,7 @@ public class YoutubeDownloader {
         return video;
     }
 
-    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, Exception {
+    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, SQLException {
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {
             SimplifiedVideo video = getVideoDataFromIDSimplified(videoId);
             ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
@@ -87,27 +83,25 @@ public class YoutubeDownloader {
 
     public ArrayList<Comment> readComments(String videoId, long maxNumberOfResults) throws IOException {
         ArrayList<Comment> comments = new ArrayList<Comment>();
-        try {
-            CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
-                    .list("snippet").setKey(APIKEY).setVideoId(videoId).setMaxResults(maxNumberOfResults).setTextFormat("plainText").execute();
 
-            List<CommentThread> videoComments = videoCommentsListResponse.getItems();
+        CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
+                .list("snippet").setKey(APIKEY).setVideoId(videoId).setMaxResults(maxNumberOfResults).setTextFormat("plainText").execute();
 
-            for (CommentThread videoComment : videoComments) {
-                CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
-                Comment comment = new Comment();
-                comment.setCommentId(videoComment.getId());
-                comment.setVideoId(videoId);
-                comment.setAuthorName(snippet.getAuthorDisplayName());
-                comment.setAuthorUrl(snippet.getAuthorChannelUrl());
-                comment.setComment(snippet.getTextDisplay());
-                comments.add(comment);
-            }
+        List<CommentThread> videoComments = videoCommentsListResponse.getItems();
 
-        } catch (Exception e) {
-
+        for (CommentThread videoComment : videoComments) {
+            CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment().getSnippet();
+            Comment comment = new Comment();
+            comment.setCommentId(videoComment.getId());
+            comment.setVideoId(videoId);
+            comment.setAuthorName(snippet.getAuthorDisplayName());
+            comment.setAuthorUrl(snippet.getAuthorChannelUrl());
+            comment.setComment(snippet.getTextDisplay());
+            comments.add(comment);
         }
 
         return comments;
     }
+
+   
 }

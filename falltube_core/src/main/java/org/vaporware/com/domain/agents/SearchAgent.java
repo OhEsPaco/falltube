@@ -1,23 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.vaporware.com.domain.agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import org.vaporware.com.domain.youtube.YoutubeSearcher;
 import org.vaporware.com.domain.exceptions.NoMorePagesException;
 import org.vaporware.com.domain.exceptions.NoResultsException;
+import org.vaporware.com.domain.objects.PropertiesObjSearcher;
 import org.vaporware.com.domain.search.SearchObject;
 
 /**
@@ -28,43 +21,34 @@ public class SearchAgent extends Agent {
 
     private ThreadedBehaviourFactory tbf;
     private static final long MAX_PER_CYCLE = 10;
-    private DFAgentDescription[] downloaders;
+    private PropertiesObjSearcher props;
 
     @Override
     protected void setup() {
-
+        System.out.println("<" + getName() + ">Setting up");
+        Object[] arguments = getArguments();
+        props = (PropertiesObjSearcher) arguments[0];
         tbf = new ThreadedBehaviourFactory();
-        ServiceDescription servicio = new ServiceDescription();
-        servicio.setType("DownloadAgent");
-        DFAgentDescription descripcion = new DFAgentDescription();
-        // Servicio que busca el agente
-        descripcion.addServices(servicio);
-        try {
-            // Todas las descripciones que encajan con la plantilla proporcionada en el DF
-            downloaders = DFService.search(this, descripcion);
+        addBehaviour(new SearchBehaviour(this));
 
-            if (downloaders.length == 0) {
-                System.out.println("Ningun agente ofrece el servicio deseado");
-            }
-
-            doDelete();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     protected void takeDown() {
+        System.out.println("<" + getName() + ">Taking down");
         tbf.interrupt();
-        System.out.println("<Agente>Terminado");
+    }
+
+    private int aleatorio(int Min, int Max) {
+        return Min + (int) (Math.random() * ((Max - Min) + 1));
     }
 
     private class SearchBehaviour extends Behaviour {
-//downloaders[i].getName()
 
         private String[] query;
-        private int queryIndex=0;
-        private int downloadersIndex=0;
+        private String[] downloaders;
+
+        private int queryIndex = 0;
         private YoutubeSearcher searcher;
         private boolean salir = false;
         private SearchObject aux = null;
@@ -77,13 +61,17 @@ public class SearchAgent extends Agent {
 
         @Override
         public void onStart() {
-            MessageTemplate performativa = MessageTemplate.MatchPerformative(Performatives.DATA_FOR_SEARCHER);
-            ACLMessage msg = myAgent.blockingReceive(performativa);
-            String[] s = msg.getContent().split("\\s+");
-            this.searcher = new YoutubeSearcher(s[0]);
-            this.query = new String[s.length - 1];
-            for (int i = 1; i < s.length; i++) {
-                query[i - 1] = s[i];
+            searcher = new YoutubeSearcher(props.getApiKey());
+            query = new String[props.getQuerys().size()];
+            downloaders = new String[props.getDownloadAgents().size()];
+            ArrayList<String> querys = props.getQuerys();
+            ArrayList<String> down = props.getDownloadAgents();
+            for (int i = 0; i < query.length; i++) {
+                query[i] = querys.get(i);
+            }
+
+            for (int i = 0; i < downloaders.length; i++) {
+                downloaders[i] = down.get(i);
             }
         }
 
@@ -100,15 +88,20 @@ public class SearchAgent extends Agent {
                     }
 
                     ids = searcher.searchObjectToIDs(aux);
-                    downloadersIndex=0;
-                    for (String id : ids) {
 
-                        // System.out.println("<" + name + ">Searching:" + id);
+                    for (String id : ids) {
+                        String d = downloaders[aleatorio(0, downloaders.length - 1)];
+                        AID receptor = new AID(d, AID.ISLOCALNAME);
+                        ACLMessage msg = new ACLMessage(Performatives.ID_FOR_DOWNLOADER);
+                        msg.addReceiver(receptor);
+                        msg.setContent(id);
+                        System.out.println("<" + myAgent.getName() + ">Sending:" + id + " to: " + d);
+                        send(msg);
                     }
 
                 } catch (NoResultsException | NoMorePagesException e) {
 
-                    if (queryIndex < ids.length - 1) {
+                    if (queryIndex < query.length - 1) {
                         queryIndex++;
                         aux = null;
                         System.out.println("<" + getName() + ">Cambiando query a:" + query[queryIndex]);
