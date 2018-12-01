@@ -83,18 +83,17 @@ public class SQLManager {
             ps.setString(2, video.getPublishedAt());
             ps.setString(3, video.getChannelId());
             String titulo = video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200);//200
-            titulo = titulo.replace("\"", " ");
+            titulo = titulo.replaceAll("\"", " ");
             ps.setString(4, titulo);
             titulo = video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200);//2000
-            titulo = titulo.replace("\"", " ");
+            titulo = titulo.replaceAll("\"", " ");
             ps.setString(5, titulo);
             ps.setString(6, video.getCategoryId());
             ps.setLong(7, getDurationSeconds(video.getDuration()));
             ps.setString(8, video.getDefinition());
 
             if (video.getDefaultAudioLanguage() == null) {
-                ps.setBoolean(9, false);
-            } else {
+             } else {
                 ps.setBoolean(9, true);
             }
 
