@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author pacog
  */
 public class PropertiesObjDownloader {
+
     private String name;
     private String apiKey;
     private String host;
@@ -20,15 +21,26 @@ public class PropertiesObjDownloader {
     private String user;
     private String password;
     private long numberOfComments;
-    public PropertiesObjDownloader(String name,String apiKey, String host, int port, String database, String user, String password,long numberOfComments) {
-        this.name=name;
+    private String regionCode;
+
+    public PropertiesObjDownloader(String name, String apiKey, String host, int port, String database, String user, String password, long numberOfComments, String regionCode) {
+        this.name = name;
         this.apiKey = apiKey;
         this.host = host;
         this.port = port;
         this.database = database;
         this.user = user;
         this.password = password;
-        this.numberOfComments=numberOfComments;
+        this.numberOfComments = numberOfComments;
+        this.regionCode = regionCode;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getName() {
@@ -47,7 +59,6 @@ public class PropertiesObjDownloader {
         this.numberOfComments = numberOfComments;
     }
 
-    
     public String getApiKey() {
         return apiKey;
     }

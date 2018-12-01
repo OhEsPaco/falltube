@@ -39,7 +39,7 @@ public class DownloadAgent extends Agent {
 
         @Override
         public void onStart() {
-            this.youtube = new YoutubeDownloader(props.getApiKey(), props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword());
+            this.youtube = new YoutubeDownloader(props.getApiKey(), props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword(),props.getRegionCode());
             this.numberOfComments = props.getNumberOfComments();
         }
 

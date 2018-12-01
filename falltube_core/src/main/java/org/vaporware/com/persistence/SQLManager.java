@@ -77,41 +77,35 @@ public class SQLManager {
         int res = 0;
         try {
             conectar();
-            String sql = "insert into video values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String sql = "insert into video values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement ps = mBD.prepareStatement(sql);
             ps.setString(1, video.getId());
-            ps.setString(2, video.getEtag());
-            ps.setString(3, video.getPublishedAt());
-            ps.setString(4, video.getChannelId());
-
-            ps.setString(5, video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200));//200
-            ps.setString(6, video.getDescription().substring(0, (video.getDescription().length() < 2000) ? video.getDescription().length() : 2000));//2000
-            ps.setString(7, video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200));//200
-
-            ps.setString(8, video.getCategoryId());
-            ps.setString(9, video.getDefaultAudioLanguage());
-            ps.setString(10, video.getDuration());
-            ps.setString(11, video.getDimension());
-            ps.setString(12, video.getDefinition());
-            ps.setBoolean(13, video.isCaption());
-            ps.setBoolean(14, video.isLicensedContent());
-            ps.setString(15, video.getProjection());
-            ps.setLong(16, video.getViewCount());
-            ps.setLong(17, video.getLikeCount());
-            ps.setLong(18, video.getDislikeCount());
-            ps.setLong(19, video.getCommentCount());
-
-            int lastTag = 20;
-            for (int i = 0; i < video.getTags().size() && i < 10; i++) {
-                ps.setString(lastTag, video.getTags().get(i).substring(0, (video.getTags().get(i).length() < 200) ? video.getTags().get(i).length() : 200));//200
-                lastTag++;
+            ps.setString(2, video.getPublishedAt());
+            ps.setString(3, video.getChannelId());
+            ps.setString(4, video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200));//200
+            ps.setString(5, video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200));//2000
+            ps.setString(6, video.getCategoryId());
+            ps.setLong(7, getDurationSeconds(video.getDuration()));
+            ps.setString(8, video.getDefinition());
+            
+            if (video.getDefaultAudioLanguage() == null) {
+                ps.setBoolean(9, false);
+            } else {
+                ps.setBoolean(9, true);
             }
+            
+            ps.setBoolean(10, video.isCaption());
+            ps.setBoolean(11, video.isLicensedContent());
 
-            if (lastTag != 30) {
-                for (int i = lastTag; i < 30; i++) {
-                    ps.setString(i, null);
-                }
-            }
+            ps.setLong(12, video.getViewCount());
+            ps.setLong(13, video.getLikeCount());
+            ps.setLong(14, video.getDislikeCount());
+            ps.setLong(15, video.getCommentCount());
+
+            //Impacto social 
+            ps.setLong(16, video.getViewCount() + video.getLikeCount() + video.getDislikeCount() + video.getCommentCount());
+
+            ps.setLong(17, video.getTags().size());
 
             res = ps.executeUpdate();
             desconectar();
@@ -151,6 +145,21 @@ public class SQLManager {
 
         }
         return res;
+    }
+
+    public long getDurationSeconds(String time) {
+        time = time.substring(2);
+        long duration = 0L;
+        Object[][] indexs = new Object[][]{{"H", 3600}, {"M", 60}, {"S", 1}};
+        for (int i = 0; i < indexs.length; i++) {
+            int index = time.indexOf((String) indexs[i][0]);
+            if (index != -1) {
+                String value = time.substring(0, index);
+                duration += Integer.parseInt(value) * (int) indexs[i][1];
+                time = time.substring(value.length() + 1);
+            }
+        }
+        return duration;
     }
 
 }

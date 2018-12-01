@@ -42,7 +42,7 @@ public class Main extends javax.swing.JFrame {
         String[] downloadAgents = appProps.getProperty("downloadAgents").split(",");
         String[] searchAgents = appProps.getProperty("searchAgents").split(",");
         String[] apiKeys = appProps.getProperty("apiKeys").split(",");
-
+        String regionCode=appProps.getProperty("regionCode");
         String host = appProps.getProperty("host");
         int port = Integer.parseInt(appProps.getProperty("port"));
         String database = appProps.getProperty("database");
@@ -120,7 +120,7 @@ public class Main extends javax.swing.JFrame {
                 api = 0;
             }
 
-            podownloader.add(new PropertiesObjDownloader(name, apiKeys[api], host, port, database, user, password, numberOfComments));
+            podownloader.add(new PropertiesObjDownloader(name, apiKeys[api], host, port, database, user, password, numberOfComments,regionCode));
 
             api++;
         }

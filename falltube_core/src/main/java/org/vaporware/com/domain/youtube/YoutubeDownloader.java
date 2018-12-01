@@ -20,9 +20,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.vaporware.com.domain.video.YoutubeVideoData;
+import org.vaporware.com.domain.youtube.Category;
 import org.vaporware.com.persistence.SQLManager;
 
 /**
@@ -43,8 +47,10 @@ public class YoutubeDownloader {
     private YouTube youtube;
     private final String APIKEY;
     private Gson g = new Gson();
+    private HashMap<Integer, String> categories = new HashMap<Integer, String>();
+    private String regionCode;
 
-    public YoutubeDownloader(String apiKey, String host, int port, String database, String user, String password) {
+    public YoutubeDownloader(String apiKey, String host, int port, String database, String user, String password, String regionCode) {
         this.APIKEY = apiKey;
         this.sqlmanager = new SQLManager(host, port, database, user, password);
         youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
@@ -52,11 +58,47 @@ public class YoutubeDownloader {
             public void initialize(HttpRequest request) throws IOException {
             }
         }).setApplicationName("youtube-cmdline-search-sample").build();
+        this.regionCode = regionCode;
+        try {
+            setCategories();
+        } catch (IOException ex) {
+            System.out.println("Error descargando categorias");
+        }
+    }
 
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public SimplifiedVideo getVideoDataFromIDSimplified(String videoId) throws IOException {
         return VideoSimplifier.simplify(getVideoDataFromID(videoId));
+    }
+//https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode={two-character-region}&key={
+
+    public void setCategories() throws MalformedURLException, IOException {
+        String requestURL = "https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=" + regionCode + "&key=" + APIKEY;
+        URL request = new URL(requestURL);
+        URLConnection connection = request.openConnection();
+        connection.setDoOutput(true);
+
+        Scanner scanner = new Scanner(request.openStream());
+        String response = scanner.useDelimiter("\\Z").next();
+
+        Category cats = g.fromJson(response, Category.class);
+
+        categories = cats.getCategories();
+    }
+
+    public HashMap<Integer, String> getCategories() {
+        return categories;
+    }
+
+    public String getCategory(int id) {
+        return categories.get(id);
     }
 
     public YoutubeVideoData getVideoDataFromID(String videoId) throws MalformedURLException, IOException {
@@ -75,9 +117,14 @@ public class YoutubeDownloader {
     public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, SQLException {
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {
             SimplifiedVideo video = getVideoDataFromIDSimplified(videoId);
-            ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
+            try{
+            video.setCategoryId(getCategory(Integer.parseInt(video.getCategoryId())));
+            }catch(Exception e){
+                 System.out.println("Error con la categoria del video:"+videoId);
+            }
             sqlmanager.insertVideo(video);
-            sqlmanager.insertComments(comments);
+            //ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
+            //sqlmanager.insertComments(comments);
         }
     }
 
@@ -103,5 +150,4 @@ public class YoutubeDownloader {
         return comments;
     }
 
-   
 }
