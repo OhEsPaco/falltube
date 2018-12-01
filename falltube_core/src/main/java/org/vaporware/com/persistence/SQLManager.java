@@ -84,6 +84,7 @@ public class SQLManager {
             ps.setString(3, video.getChannelId());
             String titulo = video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200);//200
             ps.setString(4, quitarNoAlfanumericos(titulo));
+            System.out.println(quitarNoAlfanumericos(titulo));
             titulo = video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200);//2000
             ps.setString(5, quitarNoAlfanumericos(titulo));
             ps.setString(6, video.getCategoryId());
@@ -127,7 +128,7 @@ public class SQLManager {
     public String quitarNoAlfanumericos(String str) {
         String salida = "";
         for (char c : str.toCharArray()) {
-            if (Character.isDigit(c) || Character.isAlphabetic(c)) {
+            if (Character.isDigit(c) || Character.isLetter(c)) {
                 salida = salida + c;
             } else {
                 salida = salida + " ";
