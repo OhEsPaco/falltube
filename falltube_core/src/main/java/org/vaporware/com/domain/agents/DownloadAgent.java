@@ -54,7 +54,7 @@ public class DownloadAgent extends Agent {
                         System.out.println("<" + myAgent.getName() + ">Saving video id:" + content);
                         youtube.videoIdToSql(content, numberOfComments);
                     } catch (Exception ex) {
-                       
+                      
                         System.out.println("<" + myAgent.getName() + ">Error saving video id:" + content);
                         try {
                             System.out.println("<" + myAgent.getName() + ">Saving video id:" + content + "[Retry]");

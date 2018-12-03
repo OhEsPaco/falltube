@@ -5,9 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.lang3.StringUtils.stripAccents;
 import org.vaporware.com.domain.objects.Comment;
 import org.vaporware.com.domain.objects.SimplifiedVideo;
 
@@ -17,12 +20,12 @@ import org.vaporware.com.domain.objects.SimplifiedVideo;
  */
 public class SQLManager {
 
-    private static Connection mBD;
+    private Connection mBD;
     private static String url;
     private static String driver = "com.mysql.cj.jdbc.Driver";
 
     public SQLManager(String host, int port, String database, String user, String password) {
-        this.url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?user=" + user + "&password=" + password + "&serverTimezone=UTC&useSSL=false";
+        this.url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf-8&user=" + user + "&password=" + password + "&serverTimezone=UTC&useSSL=false";
         //conectar();
     }
 
@@ -54,7 +57,7 @@ public class SQLManager {
     }
 
     public boolean isVideoOnDatabase(String id) {
-        boolean r = true;
+        boolean r = false;
         try {
             String sql = "Select 1 from video where videoId = ?";
             conectar();
@@ -62,7 +65,10 @@ public class SQLManager {
             ps.setString(1, id);
             ps.execute();
             ResultSet rs = ps.getResultSet();
-            r = rs.next();
+            if (rs != null) {
+                r = rs.next();
+            }
+
             desconectar();
 
         } catch (SQLException ex) {
@@ -83,15 +89,15 @@ public class SQLManager {
             ps.setString(2, video.getPublishedAt());
             ps.setString(3, video.getChannelId());
             String titulo = video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200);//200
-            ps.setString(4, quitarNoAlfanumericos(titulo));
-            System.out.println(quitarNoAlfanumericos(titulo));
+            ps.setString(4, cleanTextContent(titulo));
             titulo = video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200);//2000
-            ps.setString(5, quitarNoAlfanumericos(titulo));
-            ps.setString(6, video.getCategoryId());
+            ps.setString(5, cleanTextContent(titulo));
+            ps.setString(6, quitarNoAlfanumericos(cleanTextContent(video.getCategoryId())));
             ps.setLong(7, getDurationSeconds(video.getDuration()));
             ps.setString(8, video.getDefinition());
 
             if (video.getDefaultAudioLanguage() == null) {
+                ps.setBoolean(9, false);
             } else {
                 ps.setBoolean(9, true);
             }
@@ -111,8 +117,10 @@ public class SQLManager {
 
             res = ps.executeUpdate();
             desconectar();
-
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+            System.out.println("<" + video.getId() + "> Ya existe en la base de datos.");
         } catch (SQLException ex) {
+            
             desconectar();
             throw new SQLException();
         }
@@ -124,6 +132,41 @@ public class SQLManager {
             insertComment(comment);
         }
     }
+    private static final String ORIGINAL = "ÁáÉéÍíÓóÚúÑñÜü";
+    private static final String REPLACEMENT = "AaEeIiOoUuNnUu";
+
+    public static String stripAccents2(String str) {
+        if (str == null) {
+            return null;
+        }
+        char[] array = str.toCharArray();
+        for (int index = 0; index < array.length; index++) {
+            int pos = ORIGINAL.indexOf(array[index]);
+            if (pos > -1) {
+                array[index] = REPLACEMENT.charAt(pos);
+            }
+        }
+        return new String(array);
+    }
+
+    private String cleanTextContent(String text) {
+
+        text = Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        text = stripAccents2(text);
+        text = stripAccents(text);
+        text = quitarNoAlfanumericos(text);
+
+        // strips off all non-ASCII characters
+        text = text.replaceAll("[^\\x00-\\x7F]", "");
+
+        // erases all the ASCII control characters
+        text = text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+
+        // removes non-printable characters from Unicode
+        text = text.replaceAll("\\p{C}", "");
+
+        return text.trim();
+    }
 
     public String quitarNoAlfanumericos(String str) {
         String salida = "";
@@ -134,7 +177,8 @@ public class SQLManager {
                 salida = salida + " ";
             }
         }
-        return salida;
+        return salida.trim().replaceAll(" +", " ").toUpperCase();
+
     }
 
     public int insertComment(Comment comment) {

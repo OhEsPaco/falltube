@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import org.vaporware.com.domain.objects.PropertiesObjDownloader;
 import org.vaporware.com.domain.objects.PropertiesObjSearcher;
+import org.vaporware.com.domain.utilities.ReadFileLineByLineUsingBufferedReader;
 
 /**
  *
@@ -37,12 +38,12 @@ public class Main extends javax.swing.JFrame {
 
         Properties appProps = new Properties();
         appProps.load(new FileInputStream(appConfigPath));
-        PORT=Integer.parseInt(appProps.getProperty("jadePort"));
-        String[] querys = appProps.getProperty("querys").split(",");
+        PORT = Integer.parseInt(appProps.getProperty("jadePort"));
+        String[] querysfiles = appProps.getProperty("querys").split(",");
         String[] downloadAgents = appProps.getProperty("downloadAgents").split(",");
         String[] searchAgents = appProps.getProperty("searchAgents").split(",");
         String[] apiKeys = appProps.getProperty("apiKeys").split(",");
-        String regionCode=appProps.getProperty("regionCode");
+        String regionCode = appProps.getProperty("regionCode");
         String host = appProps.getProperty("host");
         int port = Integer.parseInt(appProps.getProperty("port"));
         String database = appProps.getProperty("database");
@@ -51,7 +52,7 @@ public class Main extends javax.swing.JFrame {
         long numberOfComments = Long.parseLong(appProps.getProperty("numberOfComments"));
 
         System.out.print("Las querys son: ");
-        for (String s : querys) {
+        for (String s : querysfiles) {
             System.out.print(s + " ");
         }
         System.out.println();
@@ -93,6 +94,17 @@ public class Main extends javax.swing.JFrame {
         }
 
         api = 0;
+        ArrayList<String> querys = new ArrayList<String>();
+        ArrayList<String> querysAux = new ArrayList<String>();
+        //Leer de los ficheros
+
+        for (String s : querysfiles) {
+            querysAux = ReadFileLineByLineUsingBufferedReader.read(s);
+            for (String z : querysAux) {
+                querys.add(z);
+            }
+        }
+
         for (String query : querys) {
             if (api >= posearcher.size()) {
                 api = 0;
@@ -120,7 +132,7 @@ public class Main extends javax.swing.JFrame {
                 api = 0;
             }
 
-            podownloader.add(new PropertiesObjDownloader(name, apiKeys[api], host, port, database, user, password, numberOfComments,regionCode));
+            podownloader.add(new PropertiesObjDownloader(name, apiKeys[api], host, port, database, user, password, numberOfComments, regionCode));
 
             api++;
         }
