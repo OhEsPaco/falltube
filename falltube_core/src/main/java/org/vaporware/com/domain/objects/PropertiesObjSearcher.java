@@ -15,12 +15,12 @@ public class PropertiesObjSearcher {
 
     private String nombre;
     private ArrayList<String> downloadAgents = new ArrayList<String>();
-    private String apiKey;
+    private ArrayList<String> apiKeys = new ArrayList<String>();
     private ArrayList<String> querys = new ArrayList<String>();
 
-    public PropertiesObjSearcher(String nombre, String apiKey) {
-        this.apiKey = apiKey;
-        this.nombre=nombre;
+    public PropertiesObjSearcher(String nombre) {
+
+        this.nombre = nombre;
     }
 
     public String getNombre() {
@@ -39,14 +39,6 @@ public class PropertiesObjSearcher {
         this.downloadAgents = downloadAgents;
     }
 
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
     public ArrayList<String> getQuerys() {
         return querys;
     }
@@ -59,15 +51,25 @@ public class PropertiesObjSearcher {
         downloadAgents.add(downloadAgent);
     }
 
+    public void addApiKey(String apiKey) {
+        apiKeys.add(apiKey);
+    }
+
     public void setQuerys(ArrayList<String> querys) {
         this.querys = querys;
     }
 
+    public ArrayList<String> getApiKeys() {
+        return apiKeys;
+    }
+
+    public void setApiKeys(ArrayList<String> apiKeys) {
+        this.apiKeys = apiKeys;
+    }
+
     @Override
     public String toString() {
-        return "PropertiesObjSearcher{" + "nombre=" + nombre + ", downloadAgents=" + downloadAgents + ", apiKey=" + apiKey + ", querys=" + querys + '}';
+        return "PropertiesObjSearcher{" + "nombre=" + nombre + ", downloadAgents=" + downloadAgents + ", apiKey=" + apiKeys.size() + ", querys=" + querys + '}';
     }
-    
-    
 
 }

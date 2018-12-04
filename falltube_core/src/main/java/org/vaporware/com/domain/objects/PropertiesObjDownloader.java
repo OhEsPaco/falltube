@@ -14,7 +14,8 @@ import java.util.ArrayList;
 public class PropertiesObjDownloader {
 
     private String name;
-    private String apiKey;
+    private ArrayList<String> apiKeys = new ArrayList<String>();
+    private ArrayList<String> searchers = new ArrayList<String>();
     private String host;
     private int port;
     private String database;
@@ -23,9 +24,9 @@ public class PropertiesObjDownloader {
     private long numberOfComments;
     private String regionCode;
 
-    public PropertiesObjDownloader(String name, String apiKey, String host, int port, String database, String user, String password, long numberOfComments, String regionCode) {
+    public PropertiesObjDownloader(String name, String host, int port, String database, String user, String password, long numberOfComments, String regionCode) {
         this.name = name;
-        this.apiKey = apiKey;
+
         this.host = host;
         this.port = port;
         this.database = database;
@@ -33,6 +34,7 @@ public class PropertiesObjDownloader {
         this.password = password;
         this.numberOfComments = numberOfComments;
         this.regionCode = regionCode;
+
     }
 
     public String getRegionCode() {
@@ -57,14 +59,6 @@ public class PropertiesObjDownloader {
 
     public void setNumberOfComments(long numberOfComments) {
         this.numberOfComments = numberOfComments;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
     }
 
     public String getHost() {
@@ -99,6 +93,14 @@ public class PropertiesObjDownloader {
         this.user = user;
     }
 
+    public void addApiKey(String apiKey) {
+        apiKeys.add(apiKey);
+    }
+
+    public void addSearcher(String searcher) {
+        searchers.add(searcher);
+    }
+
     public String getPassword() {
         return password;
     }
@@ -107,9 +109,21 @@ public class PropertiesObjDownloader {
         this.password = password;
     }
 
+    public ArrayList<String> getApiKeys() {
+        return apiKeys;
+    }
+
+    public void setApiKeys(ArrayList<String> apiKeys) {
+        this.apiKeys = apiKeys;
+    }
+
     @Override
     public String toString() {
-        return "PropertiesObjDownloader{" + "nombre=" + name + ", apiKey=" + apiKey + ", host=" + host + ", port=" + port + ", database=" + database + ", user=" + user + ", password=" + password + ", numberOfComments=" + numberOfComments + '}';
+        return "PropertiesObjDownloader{" + "name=" + name + ", apiKeys=" + apiKeys.size() + ", host=" + host + ", port=" + port + ", database=" + database + ", user=" + user + ", password=" + password + ", numberOfComments=" + numberOfComments + ", regionCode=" + regionCode + '}';
+    }
+
+    public ArrayList<String> getSearchers() {
+        return searchers;
     }
 
 }
