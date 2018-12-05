@@ -21,42 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package org.vaporware.com.domain.video;
+package org.vaporware.com.domain.agents;
 
-public class Standard {
+public interface ConstantsClass {
 
-    private String height;
+    int ID_FOR_DOWNLOADER = 60;
+    int DOWNLOADER_DOWN = 666;
+    int UI_PRINT = 434;
 
-    private String width;
+    int MAX_RETRIES = 3;
+    long MS_WAIT_ON_RETRY = 60000;
+    String UI_AGENT_NAME = "UIAgent1";
+    String COLOR_BLACK = "black";
+    String COLOR_RED = "red";
+    String COLOR_GREEN = "green";
+    String COLOR_BLUE = "blue";
+    String COLOR_MAGENTA = "magenta";
 
-    private String url;
-
-    public String getHeight() {
-        return height;
-    }
-
-    public void setHeight(String height) {
-        this.height = height;
-    }
-
-    public String getWidth() {
-        return width;
-    }
-
-    public void setWidth(String width) {
-        this.width = width;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    @Override
-    public String toString() {
-        return "ClassPojo [height = " + height + ", width = " + width + ", url = " + url + "]";
-    }
 }

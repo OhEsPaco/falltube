@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2018 OhEsPaco
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 package org.vaporware.com.persistence;
 
 import java.sql.Connection;
@@ -5,19 +28,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.StringUtils;
-import static org.apache.commons.lang3.StringUtils.stripAccents;
 import org.vaporware.com.domain.objects.Comment;
 import org.vaporware.com.domain.objects.SimplifiedVideo;
+import org.vaporware.com.domain.utilities.TextCleaner;
 
-/**
- *
- * @author pacog
- */
 public class SQLManager {
 
     private Connection mBD;
@@ -26,7 +43,7 @@ public class SQLManager {
 
     public SQLManager(String host, int port, String database, String user, String password) {
         this.url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf-8&user=" + user + "&password=" + password + "&serverTimezone=UTC&useSSL=false";
-        //conectar();
+
     }
 
     public Connection getConnection() {
@@ -89,10 +106,10 @@ public class SQLManager {
             ps.setString(2, video.getPublishedAt());
             ps.setString(3, video.getChannelId());
             String titulo = video.getTitle().substring(0, (video.getTitle().length() < 200) ? video.getTitle().length() : 200);//200
-            ps.setString(4, cleanTextContent(titulo));
+            ps.setString(4, TextCleaner.cleanTextContent(titulo));
             titulo = video.getChannelTitle().substring(0, (video.getChannelTitle().length() < 200) ? video.getChannelTitle().length() : 200);//2000
-            ps.setString(5, cleanTextContent(titulo));
-            ps.setString(6, quitarNoAlfanumericos(cleanTextContent(video.getCategoryId())));
+            ps.setString(5, TextCleaner.cleanTextContent(titulo));
+            ps.setString(6, TextCleaner.stripOffNoAlphanumerics(TextCleaner.cleanTextContent(video.getCategoryId())));
             ps.setLong(7, getDurationSeconds(video.getDuration()));
             ps.setString(8, video.getDefinition());
 
@@ -120,7 +137,7 @@ public class SQLManager {
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
             System.out.println("<" + video.getId() + "> Ya existe en la base de datos.");
         } catch (SQLException ex) {
-            
+
             desconectar();
             throw new SQLException();
         }
@@ -131,54 +148,6 @@ public class SQLManager {
         for (Comment comment : comments) {
             insertComment(comment);
         }
-    }
-    private static final String ORIGINAL = "ÁáÉéÍíÓóÚúÑñÜü";
-    private static final String REPLACEMENT = "AaEeIiOoUuNnUu";
-
-    public static String stripAccents2(String str) {
-        if (str == null) {
-            return null;
-        }
-        char[] array = str.toCharArray();
-        for (int index = 0; index < array.length; index++) {
-            int pos = ORIGINAL.indexOf(array[index]);
-            if (pos > -1) {
-                array[index] = REPLACEMENT.charAt(pos);
-            }
-        }
-        return new String(array);
-    }
-
-    private String cleanTextContent(String text) {
-
-        text = Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
-        text = stripAccents2(text);
-        text = stripAccents(text);
-        text = quitarNoAlfanumericos(text);
-
-        // strips off all non-ASCII characters
-        text = text.replaceAll("[^\\x00-\\x7F]", "");
-
-        // erases all the ASCII control characters
-        text = text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
-
-        // removes non-printable characters from Unicode
-        text = text.replaceAll("\\p{C}", "");
-
-        return text.trim();
-    }
-
-    public String quitarNoAlfanumericos(String str) {
-        String salida = "";
-        for (char c : str.toCharArray()) {
-            if (Character.isDigit(c) || Character.isLetter(c)) {
-                salida = salida + c;
-            } else {
-                salida = salida + " ";
-            }
-        }
-        return salida.trim().replaceAll(" +", " ").toUpperCase();
-
     }
 
     public int insertComment(Comment comment) {

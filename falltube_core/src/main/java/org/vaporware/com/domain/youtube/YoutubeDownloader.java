@@ -23,18 +23,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.vaporware.com.domain.video.YoutubeVideoData;
-import org.vaporware.com.domain.youtube.Category;
 import org.vaporware.com.persistence.SQLManager;
 
-/**
- *
- * @author pacog
- */
 public class YoutubeDownloader {
 
+    /*
+MIT License
+
+Copyright (c) 2018 OhEsPaco
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+     */
     /**
      * Global instance of the JSON factory.
      */
@@ -62,7 +78,7 @@ public class YoutubeDownloader {
         try {
             setCategories();
         } catch (IOException ex) {
-            System.out.println("Error descargando categorias");
+            System.out.println("Error downloading categories.");
         }
     }
 
@@ -77,7 +93,6 @@ public class YoutubeDownloader {
     public SimplifiedVideo getVideoDataFromIDSimplified(String videoId) throws IOException {
         return VideoSimplifier.simplify(getVideoDataFromID(videoId));
     }
-//https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode={two-character-region}&key={
 
     public void setCategories() throws MalformedURLException, IOException {
         String requestURL = "https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=" + regionCode + "&key=" + APIKEY;
@@ -117,10 +132,10 @@ public class YoutubeDownloader {
     public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, SQLException {
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {
             SimplifiedVideo video = getVideoDataFromIDSimplified(videoId);
-            try{
-            video.setCategoryId(getCategory(Integer.parseInt(video.getCategoryId())));
-            }catch(Exception e){
-                 System.out.println("Error con la categoria del video:"+videoId);
+            try {
+                video.setCategoryId(getCategory(Integer.parseInt(video.getCategoryId())));
+            } catch (Exception e) {
+                video.setCategoryId("ERROR IN CATEGORY");
             }
             sqlmanager.insertVideo(video);
             //ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
