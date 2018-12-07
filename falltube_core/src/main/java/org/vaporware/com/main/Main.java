@@ -32,10 +32,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
-import org.vaporware.com.domain.objects.PropertiesObjDownloader;
-import org.vaporware.com.domain.objects.PropertiesObjSearcher;
+import java.util.UUID;
 import org.vaporware.com.domain.utilities.ReadFileLineByLineUsingBufferedReader;
-import org.vaporware.com.domain.agents.ConstantsClass;
+import org.vaporware.com.domain.objects.PropertiesObjManagement;
 
 public class Main extends javax.swing.JFrame {
 
@@ -43,24 +42,25 @@ public class Main extends javax.swing.JFrame {
     private static int PORT;
 
     public static void main(String args[]) throws StaleProxyException, FileNotFoundException, IOException {
-
+     
         String appConfigPath = "falltube.properties";
         try {
             Properties appProps = new Properties();
             appProps.load(new FileInputStream(appConfigPath));
-            PORT = Integer.parseInt(appProps.getProperty("jadePort"));
-            String[] querysfiles = appProps.getProperty("querys").split(",");
-            String[] downloadAgents = appProps.getProperty("downloadAgents").split(",");
-            String[] searchAgents = appProps.getProperty("searchAgents").split(",");
-            String[] apiKeys = appProps.getProperty("apiKeys").split(",");
             String regionCode = appProps.getProperty("regionCode");
+            String[] apiKeysFiles = appProps.getProperty("apiKeys").split(",");
+            String[] querysfiles = appProps.getProperty("querys").split(",");
+            PORT = Integer.parseInt(appProps.getProperty("jadePort"));
+
+            int downloadAgents = Integer.parseInt(appProps.getProperty("downloadAgents"));
+            int searchAgents = Integer.parseInt(appProps.getProperty("searchAgents"));
+            int uiAgents = Integer.parseInt(appProps.getProperty("uiAgents"));
+
             String host = appProps.getProperty("host");
             int port = Integer.parseInt(appProps.getProperty("port"));
             String database = appProps.getProperty("database");
             String user = appProps.getProperty("user");
             String password = appProps.getProperty("password");
-            //long numberOfComments = Long.parseLong(appProps.getProperty("numberOfComments"));
-            long numberOfComments = 0;
 
             System.out.print("Querys: ");
             for (String s : querysfiles) {
@@ -68,20 +68,14 @@ public class Main extends javax.swing.JFrame {
             }
             System.out.println();
 
-            System.out.print("DownloadAgents: ");
-            for (String s : downloadAgents) {
-                System.out.print(s + " ");
-            }
-            System.out.println();
+            System.out.println("DownloadAgents: " + downloadAgents);
 
-            System.out.print("SearchAgents: ");
-            for (String s : searchAgents) {
-                System.out.print(s + " ");
-            }
-            System.out.println();
+            System.out.println("SearchAgents: " + searchAgents);
+
+            System.out.println("UIAgents: " + uiAgents);
 
             System.out.println("ApiKeys: ");
-            for (String s : apiKeys) {
+            for (String s : apiKeysFiles) {
                 System.out.println(s);
             }
             System.out.println();
@@ -91,75 +85,18 @@ public class Main extends javax.swing.JFrame {
             System.out.println("User:" + user);
             System.out.println();
 
-            //CREACION DE OBJETOS PropertiesObjSearcher
-            ArrayList<PropertiesObjSearcher> posearcher = new ArrayList<PropertiesObjSearcher>();
-
-            for (String nombre : searchAgents) {
-
-                posearcher.add(new PropertiesObjSearcher(nombre));
-
-            }
-
-            for (PropertiesObjSearcher p : posearcher) {
-                for (String apik : apiKeys) {
-                    p.addApiKey(apik);
-                }
-            }
-
-            ArrayList<String> querys = new ArrayList<String>();
-            ArrayList<String> querysAux = new ArrayList<String>();
-            //Leer de los ficheros
+            PropertiesObjManagement p1 = new PropertiesObjManagement(host, port, database, user, password, regionCode, uiAgents, downloadAgents, searchAgents);
 
             for (String s : querysfiles) {
-                querysAux = ReadFileLineByLineUsingBufferedReader.read(s);
-                for (String z : querysAux) {
-                    querys.add(z);
+                for (String z : ReadFileLineByLineUsingBufferedReader.read(s)) {
+                    p1.addQuery(z);
                 }
             }
 
-            int api = 0;
-            for (String query : querys) {
-                if (api >= posearcher.size()) {
-                    api = 0;
+            for (String s : apiKeysFiles) {
+                for (String z : ReadFileLineByLineUsingBufferedReader.read(s)) {
+                    p1.addApiKey(z);
                 }
-                posearcher.get(api).addQuery(query);
-                api++;
-            }
-
-            for (int i = 0; i < posearcher.size(); i++) {
-                for (int j = 0; j < downloadAgents.length; j++) {
-                    posearcher.get(i).adddownloadAgent(downloadAgents[j]);
-                }
-            }
-            ///////////////////////////////////////////////////////
-
-            for (int i = 0; i < posearcher.size(); i++) {
-                System.out.println(posearcher.get(i));
-            }
-
-            //CREACION DE OBJETOS PropertiesObjDownloader 
-            ArrayList<PropertiesObjDownloader> podownloader = new ArrayList<PropertiesObjDownloader>();
-
-            for (String name : downloadAgents) {
-
-                podownloader.add(new PropertiesObjDownloader(name, host, port, database, user, password, numberOfComments, regionCode));
-
-            }
-
-            for (PropertiesObjDownloader p3 : podownloader) {
-                for (String apik : apiKeys) {
-                    p3.addApiKey(apik);
-                }
-            }
-
-            for (PropertiesObjDownloader p3 : podownloader) {
-                for (String searcher : searchAgents) {
-                    p3.addSearcher(searcher);
-                }
-            }
-            ///////////////////////////////////////////////////////
-            for (int i = 0; i < podownloader.size(); i++) {
-                System.out.println(podownloader.get(i));
             }
 
             //Lanzamiento de Agentes
@@ -185,31 +122,22 @@ public class Main extends javax.swing.JFrame {
             System.out.println("<Containers created>");
 
             ArrayList<AgentController> agentControllers = new ArrayList();
-            System.out.println("<Creating user interface>");
-            agentControllers.add(mainContainer.createNewAgent(ConstantsClass.UI_AGENT_NAME,
-                    "org.vaporware.com.domain.agents.UIAgent", new Object[0]));
-            System.out.println("<Creating DownloadAgents>");
-            for (PropertiesObjDownloader pod : podownloader) {
-                Object[] ob = {pod};
-                agentControllers.add(mainContainer.createNewAgent(pod.getName(),
-                        "org.vaporware.com.domain.agents.DownloadAgent", ob));
-            }
 
-            System.out.println("<Creating SearchAgents>");
-            for (PropertiesObjSearcher pod : posearcher) {
-                Object[] ob = {pod};
-                agentControllers.add(mainContainer.createNewAgent(pod.getNombre(),
-                        "org.vaporware.com.domain.agents.SearchAgent", ob));
-            }
+            Object[] ob = {p1};
+            agentControllers.add(mainContainer.createNewAgent(generateName("manager"),
+                    "org.vaporware.com.domain.agents.ManagementAgent", ob));
 
             System.out.println("<Starting agents>");
             for (AgentController ag : agentControllers) {
                 ag.start();
             }
         } catch (Exception e) {
-            System.out.println("Error.");
+            System.out.println("Error. Check properties file.");
 
         }
     }
 
+    private static String generateName(String type) {
+        return type.toUpperCase() + "-" + UUID.randomUUID().toString();
+    }
 }

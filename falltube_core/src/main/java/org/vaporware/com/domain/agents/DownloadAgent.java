@@ -24,140 +24,142 @@ SOFTWARE.
 package org.vaporware.com.domain.agents;
 
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import static org.vaporware.com.domain.agents.ConstantsClass.MAX_RETRIES;
-import static org.vaporware.com.domain.agents.ConstantsClass.MS_WAIT_ON_RETRY;
+import org.vaporware.com.domain.exceptions.AlreadyExistsException;
+import org.vaporware.com.domain.exceptions.ImpossibleToCreateTable;
 import org.vaporware.com.domain.objects.PropertiesObjDownloader;
 import org.vaporware.com.domain.youtube.YoutubeDownloader;
 
-public class DownloadAgent extends Agent {
+public class DownloadAgent extends FalltubeAgent {
 
     private PropertiesObjDownloader props;
-    private AID uiAid;
+    private ThreadedBehaviourFactory tbf;
 
     @Override
     protected void setup() {
-        uiAid = new AID(ConstantsClass.UI_AGENT_NAME, AID.ISLOCALNAME);
-        sendToUI(ConstantsClass.COLOR_MAGENTA, "<" + getName() + ">Setting up...");
-        System.out.println("<" + getName() + ">Setting up...");
-        Object[] arguments = getArguments();
-        props = (PropertiesObjDownloader) arguments[0];
-        addBehaviour(new DownloadBehaviour(this));
 
-    }
-
-    private void sendToUI(String color, String msg) {
-        if(uiAid!=null){
-        ACLMessage msgUi = new ACLMessage(ConstantsClass.UI_PRINT);
-        msgUi.setSender(getAID());
-        msgUi.addReceiver(uiAid);
-        msgUi.setLanguage(color);
-        msgUi.setContent(msg);
-        send(msgUi);
+        try {
+            Object[] arguments = getArguments();
+            props = (PropertiesObjDownloader) arguments[0];
+            tbf = new ThreadedBehaviourFactory();
+            if (props == null) {
+                doDelete();
+                print(CCS.COLOR_RED, "<" + getName() + ">Error setting up downloader", true);
+            } else {
+                print(CCS.COLOR_MAGENTA, "<" + getName() + ">Setting up downloader", true);
+                registerAgent(CCS.DOWNLOADER_DF);
+                addBehaviour(tbf.wrap(new DownloadBehaviourNew()));
+            }
+        } catch (Exception e) {
+            doDelete();
+            print(CCS.COLOR_RED, "<" + getName() + ">Error setting up downloader", true);
         }
+
     }
 
     @Override
     protected void takeDown() {
-        sendToUI(ConstantsClass.COLOR_MAGENTA, "<" + getName() + ">Taking down...");
-        System.out.println("<" + getName() + ">Taking down...");
+        tbf.interrupt();
+        deregisterAgent();
+        print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
 
     }
 
-    private class DownloadBehaviour extends Behaviour {
+    private class DownloadBehaviourNew extends Behaviour {
 
+        private String apiKey;
         private YoutubeDownloader youtube;
-        private long numberOfComments;
-        private ArrayList<String> apiKeys;
-        private int actualKey;
-        private int actualRun;
-        private boolean salir;
-        private ArrayList<AID> searchers = new ArrayList<AID>();
-
-        public DownloadBehaviour(Agent a) {
-            super(a);
-            apiKeys = props.getApiKeys();
-        }
 
         @Override
         public void onStart() {
-            this.actualKey = 0;
-            this.actualRun = 0;
-            this.salir = false;
-            for (String s : props.getSearchers()) {
-                searchers.add(new AID(s, AID.ISLOCALNAME));
-            }
-            this.youtube = new YoutubeDownloader(apiKeys.get(actualKey), props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword(), props.getRegionCode());
-            this.numberOfComments = props.getNumberOfComments();
+            youtube = null;
+            apiKey = null;
+
         }
 
         @Override
         public void action() {
-            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(ConstantsClass.ID_FOR_DOWNLOADER));
-            if (msg != null) {
 
-                String content = msg.getContent();
-                if (content != null) {
-                    try {
-                        sendToUI(ConstantsClass.COLOR_GREEN, "<" + myAgent.getName() + ">Saving video id:" + content);
+            if (youtube != null) {
 
-                        youtube.videoIdToSql(content, numberOfComments);
-                    } catch (IOException e) {
+                if (youtube.isTableOnDatabase()) {
+                    ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.ID_FOR_DOWNLOADER));
+                    if (msg != null) {
+                        String content = msg.getContent();
+                        if (content != null) {
+                            try {
+                                youtube.videoIdToSql(content);
+                            } catch (IOException e) {
 
-                        //Ponemos otra vez el id a la cola
-                        myAgent.send(msg);
-                        if (actualRun < MAX_RETRIES) {
-                            if (actualKey >= apiKeys.size() - 1) {
-                                actualKey = 0;
-                                actualRun++;
-                                block(MS_WAIT_ON_RETRY);
-                            } else {
-                                actualKey++;
+                                //Ponemos otra vez el id a la cola
+                                myAgent.send(msg);
+                                apiKey = null;
+                                youtube = null;
+
+                            } catch (SQLException ex) {
+                                print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Error saving video id:" + content, true);
+                            } catch (AlreadyExistsException po) {
+                                print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Already exists in database: " + content, true);
+                            } catch (Exception exc) {
+
                             }
-                            sendToUI(ConstantsClass.COLOR_GREEN, "<" + myAgent.getName() + ">Changing key...");
 
-                            this.youtube = new YoutubeDownloader(apiKeys.get(actualKey), props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword(), props.getRegionCode());
-                        } else {
-                            salir = true;
+                        }
+                        block();
+                    } else {
+                        block();
+                    }
+                } else {
+                    try {
+                        youtube.createTable();
+                    } catch (ImpossibleToCreateTable ex) {
+                        if (!youtube.isTableOnDatabase()) {
+                            print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Can't create table", true);
+                            ACLMessage msg = new ACLMessage(CCS.KILL_YOURSELF);
+                            for (DFAgentDescription df : getAgents(CCS.MANAGEMENT_DF)) {
+                                msg.addReceiver(df.getName());
+                            }
+                            myAgent.send(msg);
                         }
 
-                    } catch (SQLException ex) {
-                        sendToUI(ConstantsClass.COLOR_RED, "<" + myAgent.getName() + ">Error saving video id:" + content);
-                        System.out.println("<" + myAgent.getName() + ">Error saving video id:" + content);
-                    } catch (Exception exc) {
-                       
                     }
-
                 }
-                block();
+
             } else {
-                block();
+                //Want api and youtube
+                AID manager = randomAgent(CCS.MANAGEMENT_DF);
+                if (manager != null) {
+                    ACLMessage msg = new ACLMessage(CCS.WANT_API);
+                    msg.addReceiver(manager);
+                    msg.setSender(myAgent.getAID());
+                    myAgent.send(msg);
+                    print(CCS.COLOR_RED, "<" + getName() + ">Waiting for API...", true);
+                    ACLMessage apiMsg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(CCS.TAKE_YOUR_API));
+                    apiKey = apiMsg.getContent();
+                    youtube = new YoutubeDownloader(apiKey, props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword(), props.getRegionCode());
+                } else {
+                    myAgent.doDelete();
+                }
             }
         }
 
         @Override
         public boolean done() {
-
-            return salir;
-        }
-
-        public int onEnd() {
-            ACLMessage msg = new ACLMessage(ConstantsClass.DOWNLOADER_DOWN);
-            for (AID s : searchers) {
-                msg.addReceiver(s);
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
+            if (msg != null) {
+                myAgent.doDelete();
+                return true;
+            } else {
+                return false;
             }
-            msg.setSender(myAgent.getAID());
-            myAgent.send(msg);
-            sendToUI(ConstantsClass.COLOR_GREEN, "<" + myAgent.getName() + ">Terminating downloader...");
-            System.out.println("<" + myAgent.getName() + ">Terminating downloader...");
-            return 0;
         }
 
     }
+
 }

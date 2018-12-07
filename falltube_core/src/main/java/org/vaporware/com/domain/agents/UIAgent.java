@@ -31,7 +31,6 @@ import jade.lang.acl.MessageTemplate;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -46,7 +45,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-public class UIAgent extends Agent {
+public class UIAgent extends FalltubeAgent {
 
     private ThreadedBehaviourFactory tbf;
     private JTextPane txtPaneOutput;
@@ -62,19 +61,22 @@ public class UIAgent extends Agent {
                     new UIAgentFrame().setVisible(true);
                 }
             });
+            registerAgent(CCS.UI_DF);
+            addBehaviour(tbf.wrap(new Printer()));
         } catch (InterruptedException ex) {
 
-            System.out.println("<" + getName() + ">Failed to launch the interface.");
+            print(CCS.COLOR_RED, "<" + getName() + ">Failed to launch the interface.", true);
         } catch (InvocationTargetException ex) {
 
-            System.out.println("<" + getName() + ">Failed to launch the interface.");
+            print(CCS.COLOR_RED, "<" + getName() + ">Failed to launch the interface.", true);
         }
-        addBehaviour(tbf.wrap(new Printer()));
+
     }
 
     @Override
     protected void takeDown() {
-        System.out.println("<" + getName() + ">Taking down...");
+        deregisterAgent();
+        print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
         tbf.interrupt();
     }
 
@@ -91,7 +93,7 @@ public class UIAgent extends Agent {
 
         @Override
         public void action() {
-            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(ConstantsClass.UI_PRINT));
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.UI_PRINT));
             if (msg != null) {
                 StyleConstants.setForeground(style, stringToColor(msg.getLanguage()));
                 try {
@@ -125,15 +127,15 @@ public class UIAgent extends Agent {
 
         private Color stringToColor(String str) {
             switch (str) {
-                case ConstantsClass.COLOR_BLACK:
+                case CCS.COLOR_BLACK:
                     return Color.BLACK;
-                case ConstantsClass.COLOR_RED:
+                case CCS.COLOR_RED:
                     return Color.RED;
-                case ConstantsClass.COLOR_GREEN:
+                case CCS.COLOR_GREEN:
                     return new Color(25600);
-                case ConstantsClass.COLOR_BLUE:
+                case CCS.COLOR_BLUE:
                     return Color.BLUE;
-                case ConstantsClass.COLOR_MAGENTA:
+                case CCS.COLOR_MAGENTA:
                     return Color.MAGENTA;
                 default:
                     return Color.BLACK;

@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.vaporware.com.domain.exceptions.AlreadyExistsException;
+import org.vaporware.com.domain.exceptions.ImpossibleToCreateTable;
 import org.vaporware.com.domain.video.YoutubeVideoData;
 import org.vaporware.com.persistence.SQLManager;
 
@@ -108,6 +112,23 @@ SOFTWARE.
         categories = cats.getCategories();
     }
 
+    public static boolean validKey(String apik) {
+        String requestURL = "https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=ES&key=" + apik;
+        try {
+            URL request = new URL(requestURL);
+            URLConnection connection = request.openConnection();
+            connection.setDoOutput(true);
+            Scanner scanner = new Scanner(request.openStream());
+            String response = scanner.useDelimiter("\\Z").next();
+        } catch (MalformedURLException ex) {
+
+        } catch (IOException ex) {
+            return false;
+        }
+        return true;
+
+    }
+
     public HashMap<Integer, String> getCategories() {
         return categories;
     }
@@ -129,7 +150,7 @@ SOFTWARE.
         return video;
     }
 
-    public void videoIdToSql(String videoId, long maxNumberOfComments) throws IOException, SQLException {
+    public void videoIdToSql(String videoId) throws IOException, SQLException, AlreadyExistsException {
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {
             SimplifiedVideo video = getVideoDataFromIDSimplified(videoId);
             try {
@@ -138,9 +159,16 @@ SOFTWARE.
                 video.setCategoryId("ERROR IN CATEGORY");
             }
             sqlmanager.insertVideo(video);
-            //ArrayList<Comment> comments = readComments(videoId, maxNumberOfComments);
-            //sqlmanager.insertComments(comments);
+
         }
+    }
+
+    public boolean isTableOnDatabase() {
+        return sqlmanager.tableExists();
+    }
+
+    public void createTable() throws ImpossibleToCreateTable {
+        sqlmanager.createTable();
     }
 
     public ArrayList<Comment> readComments(String videoId, long maxNumberOfResults) throws IOException {

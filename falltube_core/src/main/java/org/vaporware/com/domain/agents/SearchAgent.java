@@ -24,193 +24,145 @@ SOFTWARE.
 package org.vaporware.com.domain.agents;
 
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.io.IOException;
-import java.util.ArrayList;
 import org.vaporware.com.domain.youtube.YoutubeSearcher;
 import org.vaporware.com.domain.exceptions.NoMorePagesException;
 import org.vaporware.com.domain.exceptions.NoResultsException;
-import org.vaporware.com.domain.objects.PropertiesObjSearcher;
 import org.vaporware.com.domain.search.SearchObject;
 
-public class SearchAgent extends Agent {
+public class SearchAgent extends FalltubeAgent {
 
     private ThreadedBehaviourFactory tbf;
     private static final long MAX_PER_CYCLE = 10;
-    private PropertiesObjSearcher props;
-    private AID uiAid;
 
     @Override
     protected void setup() {
-        uiAid = new AID(ConstantsClass.UI_AGENT_NAME, AID.ISLOCALNAME);
-        sendToUI(ConstantsClass.COLOR_MAGENTA, "<" + getName() + ">Setting up...");
-        System.out.println("<" + getName() + ">Setting up...");
-        Object[] arguments = getArguments();
-        props = (PropertiesObjSearcher) arguments[0];
-        tbf = new ThreadedBehaviourFactory();
-        addBehaviour(tbf.wrap(new SearchBehaviour(this)));
+        try {
+            tbf = new ThreadedBehaviourFactory();
 
-    }
+            print(CCS.COLOR_GREEN, "<" + getName() + ">Setting up searcher", true);
+            registerAgent(CCS.SEARCHER_DF);
+            addBehaviour(new SearchBehaviourNew());
 
-    private void sendToUI(String color, String msg) {
-        if (uiAid != null) {
-            ACLMessage msgUi = new ACLMessage(ConstantsClass.UI_PRINT);
-            msgUi.setSender(getAID());
-            msgUi.addReceiver(uiAid);
-            msgUi.setLanguage(color);
-            msgUi.setContent(msg);
-            send(msgUi);
+        } catch (Exception e) {
+            doDelete();
+            print(CCS.COLOR_RED, "<" + getName() + ">Error setting up searcher", true);
         }
     }
 
     @Override
     protected void takeDown() {
-        sendToUI(ConstantsClass.COLOR_MAGENTA, "<" + getName() + ">Taking down...");
-        System.out.println("<" + getName() + ">Taking down...");
+        deregisterAgent();
         tbf.interrupt();
+        print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
     }
 
-    private int aleatorio(int Min, int Max) {
-        return Min + (int) (Math.random() * ((Max - Min) + 1));
-    }
+    private class SearchBehaviourNew extends Behaviour {
 
-    private class SearchBehaviour extends Behaviour {
-
-        private String[] query;
-        private ArrayList<AID> downloaders;
-
-        private int queryIndex = 0;
+        private String query;
         private YoutubeSearcher searcher;
-        private boolean salir = false;
-        private SearchObject aux = null;
+        private String apiKey;
+        private SearchObject aux;
         private String[] ids;
-
-        private ArrayList<String> apiKeys;
-        private int actualKey;
-        private int actualRun;
-
-        public SearchBehaviour(Agent a) {
-            super(a);
-            apiKeys = props.getApiKeys();
-        }
 
         @Override
         public void onStart() {
-
-            this.actualKey = 0;
-            this.actualRun = 0;
-            this.salir = false;
-
-            query = new String[props.getQuerys().size()];
-            downloaders = new ArrayList<AID>();
-            ArrayList<String> querys = props.getQuerys();
-            ArrayList<String> down = props.getDownloadAgents();
-
-            for (int i = 0; i < query.length; i++) {
-                query[i] = querys.get(i);
-            }
-
-            for (int i = 0; i < down.size(); i++) {
-                downloaders.add(new AID(down.get(i), AID.ISLOCALNAME));
-            }
-
-            searcher = new YoutubeSearcher(apiKeys.get(actualKey));
+            query = null;
+            searcher = null;
+            apiKey = null;
+            aux = null;
         }
 
         @Override
         public void action() {
-            
-            ACLMessage msgCancel = myAgent.receive(MessageTemplate.MatchPerformative(ConstantsClass.DOWNLOADER_DOWN));
 
-            if (msgCancel != null) {
-                for (int i = 0; i < downloaders.size(); i++) {
-                    if (downloaders.get(i).equals(msgCancel.getSender())) {
-                        downloaders.remove(i);
-                        break;
-                    }
-                }
-            }
+            AID manager = randomAgent(CCS.MANAGEMENT_DF);
+            AID receptor = randomAgent(CCS.DOWNLOADER_DF);
 
-            if (downloaders.isEmpty()) {
-                salir = true;
-                sendToUI(ConstantsClass.COLOR_RED, "<" + getName() + ">No more downloaders active...");
-                System.out.println("<" + getName() + ">No more downloaders active...");
-            }
-            if (!salir) {
-                sendToUI(ConstantsClass.COLOR_BLUE, "<" + getName() + ">Searching...");
-                
-                try {
-                    if (aux == null) {
-                        aux = searcher.search(query[queryIndex], MAX_PER_CYCLE);
-                    } else {
-                        aux = searcher.search(query[queryIndex], MAX_PER_CYCLE, aux);
-                    }
+            if (receptor == null) {
+                block(60000);
+            } else {
+                if (manager != null) {
+                    if (searcher != null) {
+                        if (query != null) {
+                            try {
+                                if (aux == null) {
+                                    aux = searcher.search(query, MAX_PER_CYCLE);
+                                } else {
+                                    aux = searcher.search(query, MAX_PER_CYCLE, aux);
+                                }
 
-                    ids = searcher.searchObjectToIDs(aux);
+                                ids = searcher.searchObjectToIDs(aux);
+                                
+                                for (String id : ids) {
+                                    ACLMessage msg = new ACLMessage(CCS.ID_FOR_DOWNLOADER);
+                                    msg.addReceiver(receptor);
+                                    msg.setContent(id);
+                                    send(msg);
+                                }
 
-                    for (String id : ids) {
-                        AID receptor = downloaders.get(aleatorio(0, downloaders.size() - 1));
-                        ACLMessage msg = new ACLMessage(ConstantsClass.ID_FOR_DOWNLOADER);
-                        msg.addReceiver(receptor);
-                        msg.setContent(id);
-                        sendToUI(ConstantsClass.COLOR_BLUE, "<" + myAgent.getName() + ">Sending:" + id + " to: " + receptor.getLocalName());
+                            } catch (NoResultsException | NoMorePagesException e) {
+                                ACLMessage msg = new ACLMessage(CCS.COMPLETED_QUERY);
+                                msg.setSender(myAgent.getAID());
+                                msg.addReceiver(manager);
+                                msg.setContent(query);
+                                myAgent.send(msg);
+                                query = null;
+                                aux = null;
 
-                        send(msg);
-                    }
-
-                } catch (NoResultsException | NoMorePagesException e) {
-
-                    if (queryIndex < query.length - 1) {
-                        queryIndex++;
-                        aux = null;
-                        sendToUI(ConstantsClass.COLOR_RED, "<" + getName() + ">Changing query to: " + query[queryIndex]);
-                        System.out.println("<" + getName() + ">Changing query to: " + query[queryIndex]);
-                        block(2000);
-                    } else {
-                        sendToUI(ConstantsClass.COLOR_BLUE, "<" + getName() + ">No more results.");
-                        System.out.println("<" + getName() + ">No more results.");
-                        salir = true;
-                    }
-
-                } catch (IOException z) {
-
-                    if (actualRun < ConstantsClass.MAX_RETRIES) {
-                        if (actualKey >= apiKeys.size() - 1) {
-                            actualKey = 0;
-                            actualRun++;
-                            block(ConstantsClass.MS_WAIT_ON_RETRY);
+                            } catch (IOException z) {
+                                apiKey = null;
+                                searcher = null;
+                            } catch (Exception e) {
+                               
+                                print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Unknown error.", true);
+                            }
                         } else {
-                            actualKey++;
+                            //want query
+                            ACLMessage msg = new ACLMessage(CCS.WANT_QUERY);
+                            msg.addReceiver(manager);
+                            msg.setSender(myAgent.getAID());
+                            myAgent.send(msg);
+                            print(CCS.COLOR_RED, "<" + getName() + ">Waiting for query...", true);
+                            ACLMessage queryMsg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(CCS.TAKE_YOUR_QUERY));
+                            query = queryMsg.getContent();
+                            aux = null;
                         }
-                        sendToUI(ConstantsClass.COLOR_BLUE, "<" + myAgent.getName() + ">Changing key...");
-                        System.out.println("<" + myAgent.getName() + ">Changing key...");
-                        searcher = new YoutubeSearcher(apiKeys.get(actualKey));
                     } else {
-                        salir = true;
+                        //want api and searcher
+                        ACLMessage msg = new ACLMessage(CCS.WANT_API);
+                        msg.addReceiver(manager);
+                        msg.setSender(myAgent.getAID());
+                        myAgent.send(msg);
+                        print(CCS.COLOR_RED, "<" + getName() + ">Waiting for API...", true);
+                        ACLMessage apiMsg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(CCS.TAKE_YOUR_API));
+                        apiKey = apiMsg.getContent();
+                        searcher = new YoutubeSearcher(apiKey);
                     }
-                } catch (Exception e) {
-                    sendToUI(ConstantsClass.COLOR_RED, "<" + myAgent.getName() + ">Unknown error.");
-                    System.out.println("<" + myAgent.getName() + ">Unknown error.");
+
+                } else {
+                    myAgent.doDelete();
                 }
             }
+
         }
 
         @Override
         public boolean done() {
-
-            return salir;
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
+            if (msg != null) {
+                myAgent.doDelete();
+                return true;
+            } else {
+                return false;
+            }
 
         }
 
-        public int onEnd() {
-            sendToUI(ConstantsClass.COLOR_BLUE, "<" + myAgent.getName() + ">Terminating searcher...");
-            System.out.println("<" + myAgent.getName() + ">Terminating searcher...");
-            return 0;
-        }
     }
 
 }

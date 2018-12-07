@@ -25,33 +25,33 @@ package org.vaporware.com.domain.objects;
 
 import java.util.ArrayList;
 
-public class PropertiesObjSearcher {
+public class PropertiesObjManagement extends PropertiesObjDownloader {
 
-    private String nombre;
-    private ArrayList<String> downloadAgents = new ArrayList<String>();
     private ArrayList<String> apiKeys = new ArrayList<String>();
     private ArrayList<String> querys = new ArrayList<String>();
+    private int numberOfUIAgents;
+    private int numberOfDownloaderAgents;
+    private int numberOfSearchAgents;
 
-    public PropertiesObjSearcher(String nombre) {
-
-        this.nombre = nombre;
+    public PropertiesObjManagement(String host, int port, String database, String user, String password, String regionCode, int numberOfUIAgents, int numberOfDownloaderAgents, int numberOfSearchAgents) {
+        super(host, port, database, user, password, regionCode);
+        this.numberOfDownloaderAgents = numberOfDownloaderAgents;
+        this.numberOfUIAgents = numberOfUIAgents;
+        this.numberOfSearchAgents = numberOfSearchAgents;
     }
 
-    public String getNombre() {
-        return nombre;
+    public int getNumberOfUIAgents() {
+        return numberOfUIAgents;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public int getNumberOfDownloaderAgents() {
+        return numberOfDownloaderAgents;
     }
 
-    public ArrayList<String> getDownloadAgents() {
-        return downloadAgents;
+    public int getNumberOfSearchAgents() {
+        return numberOfSearchAgents;
     }
-
-    public void setDownloadAgents(ArrayList<String> downloadAgents) {
-        this.downloadAgents = downloadAgents;
-    }
+    
 
     public ArrayList<String> getQuerys() {
         return querys;
@@ -59,10 +59,6 @@ public class PropertiesObjSearcher {
 
     public void addQuery(String query) {
         querys.add(query);
-    }
-
-    public void adddownloadAgent(String downloadAgent) {
-        downloadAgents.add(downloadAgent);
     }
 
     public void addApiKey(String apiKey) {
@@ -77,13 +73,13 @@ public class PropertiesObjSearcher {
         return apiKeys;
     }
 
-    public void setApiKeys(ArrayList<String> apiKeys) {
-        this.apiKeys = apiKeys;
+    public PropertiesObjDownloader getPropertiesObjDownloader() {
+        return new PropertiesObjDownloader(getHost(), getPort(), getDatabase(), getUser(), getPassword(), getRegionCode());
     }
 
     @Override
     public String toString() {
-        return "PropertiesObjSearcher{" + "nombre=" + nombre + ", downloadAgents=" + downloadAgents + ", apiKey=" + apiKeys.size() + ", querys=" + querys + '}';
+        return "PropertiesObjManagement{" + "apiKeys=" + apiKeys + ", querys=" + querys + ", numberOfUIAgents=" + numberOfUIAgents + ", numberOfDownloaderAgents=" + numberOfDownloaderAgents + ", numberOfSearchAgents=" + numberOfSearchAgents + '}';
     }
 
 }

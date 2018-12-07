@@ -24,13 +24,17 @@ SOFTWARE.
 package org.vaporware.com.persistence;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.vaporware.com.domain.exceptions.AlreadyExistsException;
+import org.vaporware.com.domain.exceptions.ImpossibleToCreateTable;
 import org.vaporware.com.domain.objects.Comment;
 import org.vaporware.com.domain.objects.SimplifiedVideo;
 import org.vaporware.com.domain.utilities.TextCleaner;
@@ -96,7 +100,41 @@ public class SQLManager {
         return r;
     }
 
-    public int insertVideo(SimplifiedVideo video) throws SQLException {
+    public void createTable() throws ImpossibleToCreateTable {
+        try {
+            conectar();
+
+            String sql = " CREATE TABLE `video` ("
+                    + "  `videoId` varchar(45) NOT NULL,"
+                    + "  `publishedAt` varchar(100) DEFAULT NULL,"
+                    + "  `channelId` varchar(100) DEFAULT NULL,"
+                    + "  `title` varchar(200) DEFAULT NULL,"
+                    + "  `channelTitle` varchar(200) DEFAULT NULL,"
+                    + "  `categoryId` varchar(100) DEFAULT NULL,"
+                    + "  `duration` bigint(15) DEFAULT NULL,"
+                    + "  `definition` varchar(10) DEFAULT NULL,"
+                    + "  `defaultAudioLanguage` tinyint(4) DEFAULT NULL,"
+                    + "  `caption` tinyint(4) DEFAULT NULL,"
+                    + "  `licensedContent` tinyint(4) DEFAULT NULL,"
+                    + "  `viewCount` bigint(15) DEFAULT NULL,"
+                    + "  `likeCount` bigint(15) DEFAULT NULL,"
+                    + "  `dislikeCount` bigint(15) DEFAULT NULL,"
+                    + "  `commentsCount` bigint(15) DEFAULT NULL,"
+                    + "  `socialImpact` bigint(25) DEFAULT NULL,"
+                    + "  `tags` bigint(5) DEFAULT NULL,"
+                    + "  PRIMARY KEY (`videoId`)"
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+            Statement stmt = mBD.createStatement();
+            stmt.executeUpdate(sql);
+            desconectar();
+        } catch (Exception ex) {
+            desconectar();
+            throw new ImpossibleToCreateTable();
+        }
+
+    }
+
+    public int insertVideo(SimplifiedVideo video) throws SQLException, AlreadyExistsException {
         int res = 0;
         try {
             conectar();
@@ -135,7 +173,7 @@ public class SQLManager {
             res = ps.executeUpdate();
             desconectar();
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
-            System.out.println("<" + video.getId() + "> Ya existe en la base de datos.");
+            throw new AlreadyExistsException();
         } catch (SQLException ex) {
 
             desconectar();
@@ -148,6 +186,30 @@ public class SQLManager {
         for (Comment comment : comments) {
             insertComment(comment);
         }
+    }
+
+    public boolean tableExists() {
+        boolean r = false;
+        try {
+
+            conectar();
+
+            DatabaseMetaData dbm = mBD.getMetaData();
+            ResultSet rs = dbm.getTables(null, null, "video", null);
+            if (rs.next()) {
+                r = true;
+            } else {
+                r = false;
+            }
+
+            desconectar();
+
+        } catch (SQLException ex) {
+            desconectar();
+          
+
+        }
+        return r;
     }
 
     public int insertComment(Comment comment) {

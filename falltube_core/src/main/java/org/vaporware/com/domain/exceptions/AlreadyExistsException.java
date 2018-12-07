@@ -21,21 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package org.vaporware.com.domain.agents;
+package org.vaporware.com.domain.exceptions;
 
-public interface ConstantsClass {
-
-    int ID_FOR_DOWNLOADER = 60;
-    int DOWNLOADER_DOWN = 666;
-    int UI_PRINT = 434;
-
-    int MAX_RETRIES = 3;
-    long MS_WAIT_ON_RETRY = 60000;
-    String UI_AGENT_NAME = "UIAgent1";
-    String COLOR_BLACK = "black";
-    String COLOR_RED = "red";
-    String COLOR_GREEN = "green";
-    String COLOR_BLUE = "blue";
-    String COLOR_MAGENTA = "magenta";
-
+public class AlreadyExistsException extends Exception{
+    
 }
