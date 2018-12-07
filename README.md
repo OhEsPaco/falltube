@@ -8,6 +8,15 @@ Quick and dirty youtube to sql.
 Maven
 Any java IDE
 ```
+### Building
+
+Go to falltube/falltube_core.
+
+Open your favorite terminal application and execute:
+```
+mvn clean compile assembly:single
+```
+Now you can find the jar file in falltube_core/target folder.
 
 ## Built With
 
