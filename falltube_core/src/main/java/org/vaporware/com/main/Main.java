@@ -30,10 +30,12 @@ import jade.wrapper.StaleProxyException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import static java.lang.System.exit;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.UUID;
-import org.vaporware.com.domain.utilities.ReadFileLineByLineUsingBufferedReader;
+import org.vaporware.com.domain.agents.CCS;
+import org.vaporware.com.domain.utilities.FileIO;
 import org.vaporware.com.domain.objects.PropertiesObjManagement;
 
 public class Main extends javax.swing.JFrame {
@@ -41,15 +43,21 @@ public class Main extends javax.swing.JFrame {
     private static jade.wrapper.AgentContainer mainContainer;
     private static int PORT;
 
-    public static void main(String args[]) throws StaleProxyException, FileNotFoundException, IOException {
-     
-        String appConfigPath = "falltube.properties";
+    public static void main(String args[]) {
+
         try {
             Properties appProps = new Properties();
-            appProps.load(new FileInputStream(appConfigPath));
+            try {
+                appProps.load(new FileInputStream(CCS.APPCONFIGPATH));
+            } catch (java.io.FileNotFoundException g) {
+                System.out.println("Properties file not found. Generating one...");
+                FileIO.write_line(CCS.APPCONFIGPATH, true, CCS.PROPERTIES_STRING);
+                exit(0);
+            }
+
             String regionCode = appProps.getProperty("regionCode");
             String[] apiKeysFiles = appProps.getProperty("apiKeys").split(",");
-            String[] querysfiles = appProps.getProperty("querys").split(",");
+            String[] querysfiles = appProps.getProperty("queries").split(",");
             PORT = Integer.parseInt(appProps.getProperty("jadePort"));
 
             int downloadAgents = Integer.parseInt(appProps.getProperty("downloadAgents"));
@@ -62,7 +70,7 @@ public class Main extends javax.swing.JFrame {
             String user = appProps.getProperty("user");
             String password = appProps.getProperty("password");
 
-            System.out.print("Querys: ");
+            System.out.print("Queries: ");
             for (String s : querysfiles) {
                 System.out.print(s + " ");
             }
@@ -88,13 +96,13 @@ public class Main extends javax.swing.JFrame {
             PropertiesObjManagement p1 = new PropertiesObjManagement(host, port, database, user, password, regionCode, uiAgents, downloadAgents, searchAgents);
 
             for (String s : querysfiles) {
-                for (String z : ReadFileLineByLineUsingBufferedReader.read(s)) {
+                for (String z : FileIO.read(s)) {
                     p1.addQuery(z);
                 }
             }
 
             for (String s : apiKeysFiles) {
-                for (String z : ReadFileLineByLineUsingBufferedReader.read(s)) {
+                for (String z : FileIO.read(s)) {
                     p1.addApiKey(z);
                 }
             }
@@ -131,9 +139,12 @@ public class Main extends javax.swing.JFrame {
             for (AgentController ag : agentControllers) {
                 ag.start();
             }
-        } catch (Exception e) {
-            System.out.println("Error. Check properties file.");
-
+        } catch (StaleProxyException e) {
+            System.out.println("You should change jade port.");
+        } catch (IOException v) {
+            System.out.println("Check properties file.");
+        } catch (NumberFormatException cv) {
+            System.out.println("Check numeric fields in properties file.");
         }
     }
 

@@ -25,6 +25,7 @@ package org.vaporware.com.domain.agents;
 
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
@@ -55,6 +56,7 @@ public class DownloadAgent extends FalltubeAgent {
                 print(CCS.COLOR_MAGENTA, "<" + getName() + ">Setting up downloader", true);
                 registerAgent(CCS.DOWNLOADER_DF);
                 addBehaviour(tbf.wrap(new DownloadBehaviourNew()));
+                addBehaviour(tbf.wrap(new Die()));
             }
         } catch (Exception e) {
             doDelete();
@@ -68,6 +70,18 @@ public class DownloadAgent extends FalltubeAgent {
         tbf.interrupt();
         deregisterAgent();
         print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
+
+    }
+
+    private class Die extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
+            if (msg != null) {
+                myAgent.doDelete();
+            }
+        }
 
     }
 

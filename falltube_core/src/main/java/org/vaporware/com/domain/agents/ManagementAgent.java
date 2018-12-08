@@ -85,6 +85,8 @@ public class ManagementAgent extends FalltubeAgent {
         deregisterAgent();
         tbf.interrupt();
         print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
+        print(CCS.COLOR_GREEN, "Number of downloaded words: " + wordsDownloaded.size(), true);
+        wordsDownloaded.sort(String::compareToIgnoreCase);
         print(CCS.COLOR_GREEN, "Downloaded words: " + wordsDownloaded.toString(), true);
         ACLMessage msg = new ACLMessage(CCS.KILL_YOURSELF);
 

@@ -25,6 +25,7 @@ package org.vaporware.com.domain.agents;
 
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -47,7 +48,7 @@ public class SearchAgent extends FalltubeAgent {
             print(CCS.COLOR_GREEN, "<" + getName() + ">Setting up searcher", true);
             registerAgent(CCS.SEARCHER_DF);
             addBehaviour(new SearchBehaviourNew());
-
+            addBehaviour(tbf.wrap(new Die()));
         } catch (Exception e) {
             doDelete();
             print(CCS.COLOR_RED, "<" + getName() + ">Error setting up searcher", true);
@@ -59,6 +60,18 @@ public class SearchAgent extends FalltubeAgent {
         deregisterAgent();
         tbf.interrupt();
         print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
+    }
+
+    private class Die extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
+            if (msg != null) {
+                myAgent.doDelete();
+            }
+        }
+
     }
 
     private class SearchBehaviourNew extends Behaviour {
@@ -97,7 +110,7 @@ public class SearchAgent extends FalltubeAgent {
                                 }
 
                                 ids = searcher.searchObjectToIDs(aux);
-                                
+
                                 for (String id : ids) {
                                     ACLMessage msg = new ACLMessage(CCS.ID_FOR_DOWNLOADER);
                                     msg.addReceiver(receptor);
@@ -118,7 +131,7 @@ public class SearchAgent extends FalltubeAgent {
                                 apiKey = null;
                                 searcher = null;
                             } catch (Exception e) {
-                               
+
                                 print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Unknown error.", true);
                             }
                         } else {

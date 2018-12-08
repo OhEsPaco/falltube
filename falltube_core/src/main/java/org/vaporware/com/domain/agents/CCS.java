@@ -28,7 +28,7 @@ public interface CCS {
     int ID_FOR_DOWNLOADER = 60;
     int DOWNLOADER_DOWN = 666985;
     int UI_PRINT = 434;
-    
+
     int WANT_QUERY = 23678;
     int TAKE_YOUR_QUERY = 4531432;
     int COMPLETED_QUERY = 777;
@@ -37,8 +37,8 @@ public interface CCS {
     int WANT_API = 129834;
     int TAKE_YOUR_API = 73825;
 
-    int KILL_YOURSELF=666;
-    
+    int KILL_YOURSELF = 666;
+
     String DOWNLOADER_DF = "downloader";
     String SEARCHER_DF = "searcher";
     String UI_DF = "userInterface";
@@ -57,5 +57,29 @@ public interface CCS {
     String COLOR_GREEN = "green";
     String COLOR_BLUE = "blue";
     String COLOR_MAGENTA = "magenta";
-
+    String APPCONFIGPATH = "falltube.properties";
+    String PROPERTIES_STRING = "#Region code\n"
+            + "regionCode=ES\n"
+            + "#Files containing API keys (separated by commas)\n"
+            + "apiKeys=apikeys.txt\n"
+            + "#Files containing queries (separated by commas)\n"
+            + "queries=words.txt\n"
+            + "#Port used by jade\n"
+            + "jadePort=6743\n"
+            + "#Download agents\n"
+            + "downloadAgents=2\n"
+            + "#Search agents\n"
+            + "searchAgents=3\n"
+            + "#UI agents\n"
+            + "uiAgents=1\n"
+            + "#Database host\n"
+            + "host=localhost\n"
+            + "#Database port\n"
+            + "port=\n"
+            + "#Database name\n"
+            + "database=\n"
+            + "#Database user\n"
+            + "user=\n"
+            + "#Database user password\n"
+            + "password=";
 }
