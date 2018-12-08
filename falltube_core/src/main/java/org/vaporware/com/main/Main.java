@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import jade.core.ProfileImpl;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import static java.lang.System.exit;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@ SOFTWARE.
  */
 package org.vaporware.com.domain.agents;
 
-import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.lang.acl.ACLMessage;

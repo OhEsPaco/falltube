@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -47,12 +47,12 @@ public class VideoSimplifier {
             simplificado.setChannelTitle(snp.getChannelTitle());
 
             ArrayList<String> tags = new ArrayList<String>();
-            if(snp.getTags()!=null){
+            if (snp.getTags() != null) {
                 for (String tag : snp.getTags()) {
-                tags.add(tag);
+                    tags.add(tag);
+                }
             }
-            }
-            
+
             simplificado.setTags(tags);
 
             simplificado.setCategoryId(snp.getCategoryId());
@@ -65,36 +65,29 @@ public class VideoSimplifier {
             simplificado.setLicensedContent(Boolean.parseBoolean(item.getContentDetails().getLicensedContent()));
             simplificado.setProjection(item.getContentDetails().getProjection());
 
-            
-             if(item.getStatistics().getViewCount()==null){
+            if (item.getStatistics().getViewCount() == null) {
                 simplificado.setViewCount(0);
-            }  else{
-               simplificado.setViewCount(Long.parseLong(item.getStatistics().getViewCount()));
-            }  
-             
-             
-             
-            
-             if(item.getStatistics().getLikeCount()==null){
+            } else {
+                simplificado.setViewCount(Long.parseLong(item.getStatistics().getViewCount()));
+            }
+
+            if (item.getStatistics().getLikeCount() == null) {
                 simplificado.setLikeCount(0);
-            }  else{
-               simplificado.setLikeCount(Long.parseLong(item.getStatistics().getLikeCount()));
-            }  
-             
-            
-             if(item.getStatistics().getDislikeCount()==null){
+            } else {
+                simplificado.setLikeCount(Long.parseLong(item.getStatistics().getLikeCount()));
+            }
+
+            if (item.getStatistics().getDislikeCount() == null) {
                 simplificado.setDislikeCount(0);
-            }  else{
-               simplificado.setDislikeCount(Long.parseLong(item.getStatistics().getDislikeCount()));
-            }  
-           
-            
-            if(item.getStatistics().getCommentCount()==null){
+            } else {
+                simplificado.setDislikeCount(Long.parseLong(item.getStatistics().getDislikeCount()));
+            }
+
+            if (item.getStatistics().getCommentCount() == null) {
                 simplificado.setCommentCount(0);
-            }  else{
+            } else {
                 simplificado.setCommentCount(Long.parseLong(item.getStatistics().getCommentCount()));
-            }  
-            
+            }
 
         }
 

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -125,6 +125,5 @@ public abstract class FalltubeAgent extends Agent {
     protected int random(int Min, int Max) {
         return Min + (int) (Math.random() * ((Max - Min) + 1));
     }
-
 
 }

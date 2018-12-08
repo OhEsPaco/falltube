@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 package org.vaporware.com.domain.objects;
-
 
 public class Comment {
 
@@ -73,6 +72,6 @@ public class Comment {
     }
 
     public String toString() {
-        return ("CommentId: "+commentId+"\nVideo ID: " + videoId + "\nAutor name: " + authorName + "\nAuthor url: " + authorUrl + "\n" + comment + "\n#####################################\n");
+        return ("CommentId: " + commentId + "\nVideo ID: " + videoId + "\nAutor name: " + authorName + "\nAuthor url: " + authorUrl + "\n" + comment + "\n#####################################\n");
     }
 }

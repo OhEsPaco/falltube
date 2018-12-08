@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,8 @@ public class FileIO {
     }
 
     /**
-     * write_line(..) recibe una ruta, un flag para borrar o no lo anterior,
-     * y la linea a escribir. Escribe la linea en el archivo.
+     * write_line(..) recibe una ruta, un flag para borrar o no lo anterior, y
+     * la linea a escribir. Escribe la linea en el archivo.
      *
      * @param path
      * @param borrar_archivo

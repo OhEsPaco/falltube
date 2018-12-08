@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ package org.vaporware.com.domain.search;
 import java.util.ArrayList;
 import java.util.Date;
 import org.vaporware.com.domain.video.PageInfo;
-
 
 public class SearchObject {
 

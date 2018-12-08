@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.vaporware.com.domain.exceptions.AlreadyExistsException;
 import org.vaporware.com.domain.exceptions.ImpossibleToCreateTable;
 import org.vaporware.com.domain.video.YoutubeVideoData;
@@ -35,7 +33,7 @@ public class YoutubeDownloader {
     /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

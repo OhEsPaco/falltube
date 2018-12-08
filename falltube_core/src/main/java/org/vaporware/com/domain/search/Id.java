@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 OhEsPaco
+Copyright (c) 2018 Francisco Manuel Garcia Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,23 +24,24 @@ SOFTWARE.
 package org.vaporware.com.domain.search;
 
 public class Id {
-     private String kind;
 
-        public String getKind() {
-            return this.kind;
-        }
+    private String kind;
 
-        public void setKind(String kind) {
-            this.kind = kind;
-        }
+    public String getKind() {
+        return this.kind;
+    }
 
-        private String videoId;
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
 
-        public String getVideoId() {
-            return this.videoId;
-        }
+    private String videoId;
 
-        public void setVideoId(String videoId) {
-            this.videoId = videoId;
-        }
+    public String getVideoId() {
+        return this.videoId;
+    }
+
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
+    }
 }

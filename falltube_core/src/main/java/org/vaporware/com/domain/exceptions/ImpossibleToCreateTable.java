@@ -24,5 +24,5 @@ SOFTWARE.
 package org.vaporware.com.domain.exceptions;
 
 public class ImpossibleToCreateTable extends Exception {
-    
+
 }
