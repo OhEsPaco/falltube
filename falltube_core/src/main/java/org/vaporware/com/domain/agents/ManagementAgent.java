@@ -55,7 +55,7 @@ public class ManagementAgent extends FalltubeAgent {
             Object[] arguments = getArguments();
             pom = (PropertiesObjManagement) arguments[0];
             tbf = new ThreadedBehaviourFactory();
-            ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ANY);
+            ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
 
             if (pom == null) {
                 doDelete();
@@ -67,11 +67,11 @@ public class ManagementAgent extends FalltubeAgent {
                 print(CCS.COLOR_GREEN, "<" + getName() + ">Setting up manager", true);
                 registerAgent(CCS.MANAGEMENT_DF);
                 checker = new AgentNumberChecker();
-
-                addBehaviour(tbf.wrap(checker));
-                addBehaviour(tbf.wrap(new ApiKeyDispatcher()));
-                addBehaviour(tbf.wrap(new QueryDispatcher()));
-                addBehaviour(tbf.wrap(new Die()));
+                par.addSubBehaviour(tbf.wrap(checker));
+                par.addSubBehaviour(new ApiKeyDispatcher());
+                par.addSubBehaviour(new QueryDispatcher());
+                par.addSubBehaviour(tbf.wrap(new Die()));
+                addBehaviour(par);
             }
         } catch (Exception e) {
             doDelete();

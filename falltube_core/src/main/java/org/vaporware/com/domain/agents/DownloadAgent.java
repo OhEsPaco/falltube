@@ -55,7 +55,7 @@ public class DownloadAgent extends FalltubeAgent {
             } else {
                 print(CCS.COLOR_MAGENTA, "<" + getName() + ">Setting up downloader", true);
                 registerAgent(CCS.DOWNLOADER_DF);
-                addBehaviour(tbf.wrap(new DownloadBehaviourNew()));
+                addBehaviour(new DownloadBehaviourNew());
                 addBehaviour(tbf.wrap(new Die()));
             }
         } catch (Exception e) {
