@@ -55,17 +55,20 @@ public class SQLManager {
     }
 
     //Metodo para conectar de la base de datos
-    private void conectar() {
+    private void conectar() throws SQLException {
 
         try {
             Class.forName(driver);
             mBD = DriverManager.getConnection(url);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    public void tryDatabase() throws SQLException {
+        conectar();
+        desconectar();
     }
 
     // Metodo para desconectar de la base de datos

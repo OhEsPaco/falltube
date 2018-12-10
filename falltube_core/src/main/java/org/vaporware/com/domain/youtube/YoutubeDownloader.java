@@ -148,6 +148,10 @@ SOFTWARE.
         return video;
     }
 
+    public void tryDatabase() throws SQLException {
+        sqlmanager.tryDatabase();
+    }
+
     public boolean videoIdToSql(String videoId) throws IOException, SQLException, AlreadyExistsException {
         boolean alreadyExists = true;
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {

@@ -44,7 +44,6 @@ public class ManagementAgent extends FalltubeAgent {
 
     private PropertiesObjManagement pom;
     private ThreadedBehaviourFactory tbf;
-    private AgentNumberChecker checker;
     private ArrayList<String> wordsDownloaded = new ArrayList<String>();
     private long videosOk = 0;
 
@@ -67,8 +66,7 @@ public class ManagementAgent extends FalltubeAgent {
                 }
                 print(CCS.COLOR_GREEN, "<" + getName() + ">Setting up manager", true);
                 registerAgent(CCS.MANAGEMENT_DF);
-                checker = new AgentNumberChecker();
-                par.addSubBehaviour(tbf.wrap(checker));
+                par.addSubBehaviour(tbf.wrap(new AgentNumberChecker()));
                 par.addSubBehaviour(new ApiKeyDispatcher());
                 par.addSubBehaviour(new QueryDispatcher());
                 par.addSubBehaviour(new CountVideos());
@@ -139,16 +137,28 @@ public class ManagementAgent extends FalltubeAgent {
         }
     }
 
-    private class Die extends CyclicBehaviour {
+    private class Die extends Behaviour {
+
+        private boolean end = false;
 
         @Override
         public void action() {
             ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
             if (msg != null) {
-                myAgent.doDelete();
+                end = true;
             }
         }
 
+        @Override
+        public boolean done() {
+            return end;
+        }
+
+        @Override
+        public int onEnd() {
+            myAgent.doDelete();
+            return 0;
+        }
     }
 
     private class ApiKeyDispatcher extends CyclicBehaviour {
@@ -239,7 +249,7 @@ public class ManagementAgent extends FalltubeAgent {
 
         @Override
         public int onEnd() {
-            checker.block();
+
             myAgent.doDelete();
             return 0;
         }

@@ -9,7 +9,7 @@
 
     <groupId>org.vaporware.com</groupId>
     <artifactId>falltube_core</artifactId>
-    <version>1.3.8</version>
+    <version>1.3.9</version>
     <packaging>jar</packaging>
     <name>falltube_core</name>
     <url>https://github.com/OhEsPaco/falltube</url>

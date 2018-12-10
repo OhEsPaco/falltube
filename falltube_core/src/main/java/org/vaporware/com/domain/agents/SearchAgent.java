@@ -168,12 +168,17 @@ public class SearchAgent extends FalltubeAgent {
         public boolean done() {
             ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
             if (msg != null) {
-                myAgent.doDelete();
                 return true;
             } else {
                 return false;
             }
 
+        }
+
+        @Override
+        public int onEnd() {
+            myAgent.doDelete();
+            return 0;
         }
 
     }

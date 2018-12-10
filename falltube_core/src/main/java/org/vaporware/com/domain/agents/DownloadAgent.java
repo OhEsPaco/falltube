@@ -89,6 +89,7 @@ public class DownloadAgent extends FalltubeAgent {
 
         private String apiKey;
         private YoutubeDownloader youtube;
+        private boolean end = false;
 
         @Override
         public void onStart() {
@@ -139,7 +140,7 @@ public class DownloadAgent extends FalltubeAgent {
                         youtube.createTable();
                     } catch (ImpossibleToCreateTable ex) {
                         if (!youtube.isTableOnDatabase()) {
-                            print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Can't create table", true);
+                            print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Can't create table.", true);
                             ACLMessage msg = new ACLMessage(CCS.KILL_YOURSELF);
                             for (DFAgentDescription df : getAgents(CCS.MANAGEMENT_DF)) {
                                 msg.addReceiver(df.getName());
@@ -162,6 +163,12 @@ public class DownloadAgent extends FalltubeAgent {
                     ACLMessage apiMsg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(CCS.TAKE_YOUR_API));
                     apiKey = apiMsg.getContent();
                     youtube = new YoutubeDownloader(apiKey, props.getHost(), props.getPort(), props.getDatabase(), props.getUser(), props.getPassword(), props.getRegionCode());
+                    try {
+                        youtube.tryDatabase();
+                    } catch (SQLException ex) {
+                        print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Error accesing database.", true);
+                        end = true;
+                    }
                 } else {
                     myAgent.doDelete();
                 }
@@ -171,12 +178,18 @@ public class DownloadAgent extends FalltubeAgent {
         @Override
         public boolean done() {
             ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.KILL_YOURSELF));
-            if (msg != null) {
-                myAgent.doDelete();
+            if (msg != null || end == true) {
+
                 return true;
             } else {
                 return false;
             }
+        }
+
+        @Override
+        public int onEnd() {
+            myAgent.doDelete();
+            return 0;
         }
 
     }
