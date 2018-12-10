@@ -108,7 +108,12 @@ public class DownloadAgent extends FalltubeAgent {
                         String content = msg.getContent();
                         if (content != null) {
                             try {
-                                youtube.videoIdToSql(content);
+                                boolean alreadyExists = youtube.videoIdToSql(content);
+                                if (!alreadyExists) {
+                                    ACLMessage videoOk = new ACLMessage(CCS.DOWNLOADED_OK);
+                                    videoOk.setSender(myAgent.getAID());
+                                    sendToAll(CCS.MANAGEMENT_DF, videoOk);
+                                }
                             } catch (IOException e) {
 
                                 //Ponemos otra vez el id a la cola
@@ -119,7 +124,7 @@ public class DownloadAgent extends FalltubeAgent {
                             } catch (SQLException ex) {
                                 print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Error saving video id:" + content, true);
                             } catch (AlreadyExistsException po) {
-                                print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Already exists in database: " + content, true);
+                                //print(CCS.COLOR_RED, "<" + myAgent.getName() + ">Already exists in database: " + content, true);
                             } catch (Exception exc) {
 
                             }

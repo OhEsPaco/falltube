@@ -108,6 +108,17 @@ public abstract class FalltubeAgent extends Agent {
         }
     }
 
+    protected int sendToAll(String type, ACLMessage msg) {
+        DFAgentDescription[] agents = getAgents(type);
+        for (DFAgentDescription df : agents) {
+            msg.addReceiver(df.getName());
+        }
+        if (agents.length != 0) {
+            send(msg);
+        }
+        return agents.length;
+    }
+
     protected int numberOfAgents(String type) {
         try {
             DFAgentDescription dfd = new DFAgentDescription();

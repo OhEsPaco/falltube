@@ -148,7 +148,8 @@ SOFTWARE.
         return video;
     }
 
-    public void videoIdToSql(String videoId) throws IOException, SQLException, AlreadyExistsException {
+    public boolean videoIdToSql(String videoId) throws IOException, SQLException, AlreadyExistsException {
+        boolean alreadyExists = true;
         if (sqlmanager.isVideoOnDatabase(videoId) == false) {
             SimplifiedVideo video = getVideoDataFromIDSimplified(videoId);
             try {
@@ -157,8 +158,9 @@ SOFTWARE.
                 video.setCategoryId("ERROR IN CATEGORY");
             }
             sqlmanager.insertVideo(video);
-
+            alreadyExists = false;
         }
+        return alreadyExists;
     }
 
     public boolean isTableOnDatabase() {

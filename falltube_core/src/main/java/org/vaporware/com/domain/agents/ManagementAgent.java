@@ -46,6 +46,7 @@ public class ManagementAgent extends FalltubeAgent {
     private ThreadedBehaviourFactory tbf;
     private AgentNumberChecker checker;
     private ArrayList<String> wordsDownloaded = new ArrayList<String>();
+    private long videosOk = 0;
 
     //Reparte keys y queries
     @Override
@@ -70,6 +71,7 @@ public class ManagementAgent extends FalltubeAgent {
                 par.addSubBehaviour(tbf.wrap(checker));
                 par.addSubBehaviour(new ApiKeyDispatcher());
                 par.addSubBehaviour(new QueryDispatcher());
+                par.addSubBehaviour(new CountVideos());
                 par.addSubBehaviour(tbf.wrap(new Die()));
                 addBehaviour(par);
             }
@@ -85,6 +87,7 @@ public class ManagementAgent extends FalltubeAgent {
         deregisterAgent();
         tbf.interrupt();
         print(CCS.COLOR_RED, "<" + getName() + ">Taking down...", true);
+        print(CCS.COLOR_GREEN, "Number of downloaded videos: " + videosOk, true);
         print(CCS.COLOR_GREEN, "Number of downloaded words: " + wordsDownloaded.size(), true);
         wordsDownloaded.sort(String::compareToIgnoreCase);
         print(CCS.COLOR_GREEN, "Downloaded words: " + wordsDownloaded.toString(), true);
@@ -122,6 +125,17 @@ public class ManagementAgent extends FalltubeAgent {
         } catch (StaleProxyException ex) {
             print(CCS.COLOR_RED, "<" + getName() + ">Error launching " + agentName, true);
             return false;
+        }
+    }
+
+    private class CountVideos extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive(MessageTemplate.MatchPerformative(CCS.DOWNLOADED_OK));
+            if (msg != null) {
+                videosOk++;
+            }
         }
     }
 

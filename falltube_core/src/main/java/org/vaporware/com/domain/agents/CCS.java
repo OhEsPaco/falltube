@@ -27,6 +27,8 @@ public interface CCS {
 
     int ID_FOR_DOWNLOADER = 60;
     int DOWNLOADER_DOWN = 666985;
+    int DOWNLOADED_OK=788175;
+    
     int UI_PRINT = 434;
 
     int WANT_QUERY = 23678;
